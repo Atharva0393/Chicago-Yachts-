@@ -34,12 +34,10 @@ export async function Recommendations({ currentYachtId }: Props) {
                 price={yacht.pricePerHour}
                 capacity={yacht.capacity}
                 length={`${yacht.length} ft`}
-                location={yacht.location}
+                location="Burnham Harbor, Chicago"
                 rating={yacht.rating}
                 reviews={yacht.reviewCount}
                 instantBook={yacht.amenities.includes("Instant Book")}
-                availableToday={yacht.availabilityStatus === "Available Today"}
-                showBookNow={true}
               />
             </div>
           ))}

@@ -1,4 +1,25 @@
-export const yachts = [
+export type Yacht = {
+  id: string;
+  name: string;
+  description: string;
+  images: string[];
+  capacity: number;
+  length: number;
+  manufacturer: string;
+  model: string;
+  year: number;
+  cabins: number;
+  bathrooms: number;
+  crewIncluded: boolean;
+  availabilityStatus: string;
+  amenities: string[];
+  pricePerHour: number;
+  rating: number;
+  reviewCount: number;
+  isFeatured: boolean;
+};
+
+export const yachts: Yacht[] = [
   {
     id: "yacht-1",
     name: "The Sovereign",

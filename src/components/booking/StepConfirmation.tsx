@@ -60,7 +60,7 @@ export function StepConfirmation({ bookingData, yacht }: Props) {
             <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
             <div className="flex flex-col">
               <span className="text-xs uppercase font-bold tracking-widest text-muted-foreground mb-1">Departure</span>
-              <span className="font-medium text-foreground">{yacht.location}</span>
+              <span className="font-medium text-foreground">Burnham Harbor, Chicago</span>
               <span className="text-muted-foreground text-sm mt-1">Please arrive 15 mins prior.</span>
             </div>
           </div>

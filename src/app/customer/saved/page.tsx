@@ -11,7 +11,7 @@ export default function WishlistPage() {
   const { savedYachts } = useWishlist()
   
   // Filter the full yacht list to only show saved yachts
-  const displayYachts = yachts.filter(yacht => savedYachts.includes(yacht.id))
+  const displayYachts = savedYachts;
 
   if (displayYachts.length === 0) {
     return (
@@ -57,11 +57,10 @@ export default function WishlistPage() {
             price={yacht.pricePerHour}
             capacity={yacht.capacity}
             length={`${yacht.length} ft`}
-            location={yacht.location}
+            location="Burnham Harbor, Chicago"
             rating={yacht.rating}
             reviews={yacht.reviewCount}
             instantBook={yacht.amenities.includes("Instant Book")}
-            availableToday={yacht.availabilityStatus === "Available Today"}
           />
         ))}
       </div>

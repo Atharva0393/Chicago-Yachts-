@@ -33,7 +33,7 @@ export function StepDate({ bookingData, setBookingData, onNext }: Props) {
           mode="single"
           selected={bookingData.date || undefined}
           onSelect={handleSelect}
-          disabled={(date) => isBefore(date, today) || date > maxDate}
+          disabled={(date: Date) => isBefore(date, today) || date > maxDate}
           className="mx-auto"
           classNames={{
             day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",

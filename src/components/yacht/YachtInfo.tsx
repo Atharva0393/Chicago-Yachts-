@@ -161,7 +161,7 @@ export function YachtInfo({ id, name, capacity, length, location, rating, review
       {/* Policies & FAQ */}
       <div className="flex flex-col gap-6 pb-8">
         <h3 className="text-2xl font-medium">Things to know</h3>
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion className="w-full">
           <AccordionItem value="policy">
             <AccordionTrigger className="text-lg font-medium hover:no-underline">Cancellation Policy</AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed">
