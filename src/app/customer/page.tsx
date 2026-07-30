@@ -73,7 +73,7 @@ export default function CustomerDashboardOverview() {
                 <div>
                   <h3 className="text-2xl font-semibold tracking-tight mb-1">{nextTrip.name}</h3>
                   <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-                    <MapPin className="h-4 w-4" /> {nextTrip.location}
+                    <MapPin className="h-4 w-4" /> Burnham Harbor, Chicago
                   </div>
                 </div>
                 <div className="flex flex-col bg-muted/30 px-4 py-2 rounded-2xl border border-border/50 md:items-end">
