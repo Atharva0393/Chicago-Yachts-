@@ -1,4 +1,4 @@
-"use client"
+// EmptyState.tsx
 
 import React from "react"
 import { LucideIcon } from "lucide-react"

@@ -1,3 +1,5 @@
+"use client"
+
 import { EmptyState } from "@/components/shared/EmptyState"
 import { CalendarDays, ArrowRight } from "lucide-react"
 import Link from "next/link"
