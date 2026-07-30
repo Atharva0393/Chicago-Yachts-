@@ -1,0 +1,213 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// ENUMS
+// ----------------------------------------------------------------------------
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  REFUNDED
+  FAILED
+}
+
+// ----------------------------------------------------------------------------
+// MODELS
+// ----------------------------------------------------------------------------
+
+model Yacht {
+  id          String    @id @default(uuid())
+  name        String
+  description String?   @db.Text
+  capacity    Int       // Maximum number of guests
+  length      Float     // Length of the yacht in feet/meters
+  year        Int?
+  make        String?
+  model       String?
+  
+  // Relationships
+  images      YachtImage[]
+  amenities   YachtAmenity[]
+  pricing     Pricing[]
+  availability Availability[]
+  bookings    Booking[]
+  reviews     Review[]
+
+  // Timestamps & Soft Delete
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model YachtImage {
+  id        String    @id @default(uuid())
+  url       String
+  altText   String?
+  isPrimary Boolean   @default(false)
+  
+  yachtId   String
+  yacht     Yacht     @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model YachtAmenity {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  
+  yachtId     String
+  yacht       Yacht     @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Pricing {
+  id          String    @id @default(uuid())
+  title       String    // e.g., "Standard Hourly", "Full Day"
+  price       Decimal   @db.Decimal(10, 2)
+  isActive    Boolean   @default(true)
+
+  yachtId     String
+  yacht       Yacht     @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model Availability {
+  id          String    @id @default(uuid())
+  date        DateTime  @db.Date
+  notes       String?   // E.g., "Maintenance" or special notes
+  
+  yachtId     String
+  yacht       Yacht     @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+
+  timeSlots   TimeSlot[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model TimeSlot {
+  id             String       @id @default(uuid())
+  startTime      DateTime     @db.Time
+  endTime        DateTime     @db.Time
+  isBooked       Boolean      @default(false)
+  
+  availabilityId String
+  availability   Availability @relation(fields: [availabilityId], references: [id], onDelete: Cascade)
+
+  bookingId      String?
+  booking        Booking?     @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Customer {
+  id          String    @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String    @unique
+  phone       String?
+  
+  bookings    Booking[]
+  reviews     Review[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("ADMIN") // e.g., SUPER_ADMIN, ADMIN, MANAGER
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+model Booking {
+  id            String        @id @default(uuid())
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  guestCount    Int
+  
+  bookingStatus BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  
+  // Relationships
+  yachtId       String
+  yacht         Yacht         @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+  
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  timeSlots     TimeSlot[]
+  notes         BookingNote[]
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+}
+
+model BookingNote {
+  id        String    @id @default(uuid())
+  content   String    @db.Text
+  
+  // Could reference an AdminUser if we want to track who left the note, 
+  // but kept as generic text/authorId for flexibility as per requirements.
+  authorId  String?   
+  
+  bookingId String
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Review {
+  id         String    @id @default(uuid())
+  rating     Int       // 1 to 5
+  comment    String?   @db.Text
+  isApproved Boolean   @default(false)
+  
+  yachtId    String
+  yacht      Yacht     @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+  
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+}
