@@ -17,23 +17,45 @@ export const authOptions: NextAuthOptions = {
 
         console.log("LOGIN ATTEMPT RECEIVED:", { email: credentials.email, passLength: credentials.password.length });
 
-        // MOCK AUTHENTICATION (Since there is no DB configured yet)
-        if (
-          credentials.email.trim().toLowerCase() === "admin@chicagoyachts.com" &&
-          credentials.password.trim() === "admin123"
-        ) {
-          console.log("LOGIN SUCCESS MOCK");
-          return {
-            id: "mock-admin-1",
-            email: "admin@chicagoyachts.com",
-            name: "Super Admin",
-            role: "SUPER_ADMIN"
-          }
+        // DB AUTHENTICATION
+        const { db } = await import("@/lib/db");
+        const bcrypt = (await import("bcryptjs")).default;
+
+        const admin = await db.adminUser.findUnique({
+          where: { email: credentials.email.trim().toLowerCase() }
+        });
+
+        if (!admin) {
+          console.log("LOGIN FAILED: User not found.");
+          throw new Error("Invalid credentials");
         }
 
-        console.log("LOGIN FAILED MOCK: Credentials did not match.");
+        if (!admin.isActive) {
+          console.log("LOGIN FAILED: User is inactive.");
+          throw new Error("Account is inactive");
+        }
 
-        throw new Error("Invalid credentials")
+        const isValidPassword = await bcrypt.compare(credentials.password, admin.passwordHash);
+
+        if (!isValidPassword) {
+          console.log("LOGIN FAILED: Incorrect password.");
+          throw new Error("Invalid credentials");
+        }
+
+        console.log(`LOGIN SUCCESS: ${admin.email}`);
+        
+        // Update last login
+        await db.adminUser.update({
+          where: { id: admin.id },
+          data: { lastLoginAt: new Date() }
+        });
+
+        return {
+          id: admin.id,
+          email: admin.email,
+          name: `${admin.firstName} ${admin.lastName}`,
+          role: admin.role
+        };
       }
     })
   ],

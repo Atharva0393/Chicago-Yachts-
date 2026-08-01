@@ -1,4 +1,6 @@
-export const faqs = [
+import { FAQ } from "@/types";
+
+export const faqs: FAQ[] = [
   {
     q: "How much does it cost to rent a luxury yacht?",
     a: "Charters start around $129/hour for captained speedboats and range to $3,500+/hour for event superyachts. Most guests spend $800–$2,500 for a 4-hour private charter. Every listing shows transparent hourly pricing with no hidden fees.",

@@ -37,15 +37,6 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // FAST BYPASS: Set a local mock cookie to bypass NextAuth configuration errors
-      if (data.email.trim().toLowerCase() === "admin@chicagoyachts.com" && data.password.trim() === "admin123") {
-        document.cookie = "admin_session=true; path=/; max-age=86400"
-        router.push("/admin")
-        router.refresh()
-        return
-      }
-
-      // Fallback for real auth
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -53,7 +44,7 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError(`Auth Error: ${result.error}`)
+        setError("Invalid email or password.")
         setIsLoading(false)
       } else {
         router.push("/admin")

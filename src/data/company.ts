@@ -1,4 +1,6 @@
-export const companyInfo = {
+import { CompanyInfo } from "@/types";
+
+export const companyInfo: CompanyInfo = {
   name: "Chicago Yachts",
   description: "Chicago's trusted yacht rental company. 22+ luxury vessels, USCG certified crews, and 500+ happy guests. Operating from Chicago Harbor on Lake Michigan.",
   phone: "+1 (312) 735-8231",

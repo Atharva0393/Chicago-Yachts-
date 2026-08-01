@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Anchor, Users, Ruler } from "lucide-react";
-import { yachts as allYachts } from "@/lib/constants/demo-data";
+import { yachtRepository } from "@/server/repositories/yacht.repository";
 
-export function FeaturedFleet() {
-  const yachts = [...allYachts].sort((a, b) => b.length - a.length).slice(0, 3).map(y => ({
+export async function FeaturedFleet() {
+  const allYachts = await yachtRepository.getFeaturedYachts(3);
+  const yachts = [...allYachts].map(y => ({
     id: y.id,
     name: y.name,
     capacity: y.capacity,

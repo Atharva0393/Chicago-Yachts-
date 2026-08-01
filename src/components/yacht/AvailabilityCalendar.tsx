@@ -1,28 +1,54 @@
 "use client"
-
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useBooking } from "@/lib/contexts/BookingContext";
 
 export function AvailabilityCalendar() {
+  const { selectedDate, setSelectedDate, duration, availableSlots } = useBooking();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const year = new Date().getFullYear(); // dynamic
   
-  const daysInMonth = 31;
-  const firstDay = 3; // Wednesday start for mock data
+  const daysInMonth = new Date(year, currentMonth + 1, 0).getDate();
+  const firstDay = new Date(year, currentMonth, 1).getDay();
   
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDay }, (_, i) => i);
 
-  // Mock availability: 1 = Available, 2 = Booked, 3 = Pending
+  // Status reading from availableSlots service data
   const getStatus = (day: number) => {
-    if (day % 7 === 0 || day % 5 === 0) return 'booked';
-    if (day % 11 === 0) return 'pending';
+    const dateStr = `${year}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayData = availableSlots[dateStr];
+    
+    if (!dayData) return 'available'; // Default while loading
+    
+    // If Full Day is booked, the whole day is booked
+    if (dayData.slots['Full Day'] === 'booked') return 'booked';
+    
+    // If Full Day is pending, the whole day is pending
+    if (dayData.slots['Full Day'] === 'pending') return 'pending';
+    
     return 'available';
+  };
+
+  const handleDayClick = (day: number) => {
+    // Create new date in local timezone
+    const newDate = new Date(year, currentMonth, day);
+    
+    // Toggle off if same date
+    if (selectedDate && 
+        selectedDate.getDate() === day && 
+        selectedDate.getMonth() === currentMonth && 
+        selectedDate.getFullYear() === year) {
+      setSelectedDate(null);
+    } else {
+      setSelectedDate(newDate);
+    }
   };
 
   return (
     <section className="py-10 border-b border-slate-100">
       <h2 className="text-2xl font-medium text-slate-900 tracking-tight mb-2">Availability</h2>
-      <p className="text-slate-500 font-light mb-8">Minimum 4-hour charter duration required.</p>
+      <p className="text-slate-500 font-light mb-8">Minimum {duration}-hour charter duration required.</p>
       
       <div className="max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
@@ -47,14 +73,18 @@ export function AvailabilityCalendar() {
           ))}
           {days.map(d => {
             const status = getStatus(d);
+            const isSelected = selectedDate?.getDate() === d && selectedDate?.getMonth() === currentMonth;
+            
             return (
               <button 
                 key={d} 
+                onClick={() => handleDayClick(d)}
                 className={`
                   h-10 w-10 mx-auto rounded-full text-sm font-medium transition-colors flex items-center justify-center
-                  ${status === 'available' ? 'text-slate-900 hover:bg-slate-100' : ''}
-                  ${status === 'booked' ? 'text-slate-300 line-through cursor-not-allowed' : ''}
-                  ${status === 'pending' ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : ''}
+                  ${isSelected ? 'bg-slate-900 text-white shadow-md hover:bg-slate-800' : ''}
+                  ${!isSelected && status === 'available' ? 'text-slate-900 hover:bg-slate-100' : ''}
+                  ${!isSelected && status === 'booked' ? 'text-slate-300 line-through cursor-not-allowed' : ''}
+                  ${!isSelected && status === 'pending' ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : ''}
                 `}
                 disabled={status === 'booked'}
               >
@@ -65,7 +95,8 @@ export function AvailabilityCalendar() {
         </div>
         
         <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100 text-xs font-medium text-slate-500">
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-slate-900" /> Available</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-slate-900" /> Selected</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full border border-slate-300" /> Available</div>
           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-slate-200" /> Booked</div>
           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-400" /> Pending</div>
         </div>

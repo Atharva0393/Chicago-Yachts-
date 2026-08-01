@@ -14,31 +14,66 @@ import { FleetCTA } from "@/components/fleet/FleetCTA";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Search } from "lucide-react";
 import { useCompare } from "@/lib/contexts/CompareContext";
-import { yachts as rawYachts } from "@/lib/constants/demo-data";
+import { useFleetState } from "@/hooks/useFleetState";
+import { useYachts } from "@/hooks/useData";
 
-const allYachts = rawYachts.map(yacht => ({
-  id: yacht.id,
-  name: yacht.name,
-  manufacturer: yacht.manufacturer,
-  image: yacht.images?.[0] || "",
-  price: yacht.pricePerHour * 4,
-  capacity: yacht.capacity,
-  length: `${yacht.length} ft`,
-  location: yacht.location,
-  rating: yacht.rating,
-  reviews: yacht.reviewCount,
-  verified: true,
-  isLuxury: yacht.pricePerHour > 500,
-  instantBook: yacht.availabilityStatus === "Available Today"
-}));
-
-export default function FleetPage() {
+function FleetContent() {
   const { selectedYachts } = useCompare();
+  const { yachts: rawYachts, loading } = useYachts();
+  const state = useFleetState();
+  
+  const allYachts = rawYachts.map(yacht => ({
+    id: yacht.id,
+    name: yacht.name,
+    manufacturer: yacht.manufacturer,
+    image: yacht.images?.[0] || "",
+    price: yacht.pricePerHour * 4,
+    capacity: yacht.capacity,
+    length: `${yacht.length} ft`,
+    location: yacht.location,
+    rating: yacht.rating,
+    reviews: yacht.reviewCount,
+    verified: true,
+    isLuxury: yacht.pricePerHour > 500,
+    instantBook: yacht.availabilityStatus === "Available Today"
+  }));
+
+  // Filtering
+  let filteredYachts = allYachts.filter(yacht => {
+    if (state.q && !yacht.name.toLowerCase().includes(state.q.toLowerCase())) return false;
+    
+    if (state.dest.length > 0 && !state.dest.some(d => yacht.location.toLowerCase().includes(d.toLowerCase()))) return false;
+
+    if (state.minPrice && yacht.price < parseInt(state.minPrice)) return false;
+    if (state.maxPrice && yacht.price > parseInt(state.maxPrice)) return false;
+
+    if (state.guests.length > 0) {
+      const fits = state.guests.some(range => {
+        if (range === "21+") return yacht.capacity >= 21;
+        const [min, max] = range.split('-').map(Number);
+        return yacht.capacity >= min && yacht.capacity <= max;
+      });
+      if (!fits) return false;
+    }
+
+    return true;
+  });
+
+  // Sorting
+  if (state.sort === "price_asc") filteredYachts.sort((a, b) => a.price - b.price);
+  else if (state.sort === "price_desc") filteredYachts.sort((a, b) => b.price - a.price);
+  else if (state.sort === "capacity_desc") filteredYachts.sort((a, b) => b.capacity - a.capacity);
+  else if (state.sort === "rating") filteredYachts.sort((a, b) => b.rating - a.rating);
+
+  // Pagination
+  const ITEMS_PER_PAGE = 9;
+  const totalCount = filteredYachts.length;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const paginatedYachts = filteredYachts.slice((state.page - 1) * ITEMS_PER_PAGE, state.page * ITEMS_PER_PAGE);
   
   const [quickViewId, setQuickViewId] = useState<string | null>(null);
   const quickViewYacht = quickViewId ? allYachts.find(y => y.id === quickViewId) : null;
 
-  // We need full objects for the CompareBar
   const comparedYachtObjects = selectedYachts
     .map(sy => allYachts.find(y => y.id === sy.id))
     .filter(Boolean);
@@ -53,11 +88,11 @@ export default function FleetPage() {
           <FleetFilters />
 
           <div className="flex-1 flex flex-col min-w-0">
-            <FleetSort totalCount={allYachts.length} />
+            <FleetSort totalCount={totalCount} />
             
-            {allYachts.length > 0 ? (
+            {paginatedYachts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
-                {allYachts.map(yacht => (
+                {paginatedYachts.map(yacht => (
                   <YachtCard 
                     key={yacht.id} 
                     {...yacht} 
@@ -72,7 +107,7 @@ export default function FleetPage() {
                   title="No yachts found"
                   description="We couldn't find any yachts matching your exact criteria. Try adjusting your dates, guest count, or budget."
                   action={
-                    <button className="bg-slate-900 text-white px-8 py-4 rounded-full font-medium transition-luxury shadow-md hover:bg-slate-800">
+                    <button onClick={state.clearAll} className="bg-slate-900 text-white px-8 py-4 rounded-full font-medium transition-luxury shadow-md hover:bg-slate-800">
                       Clear All Filters
                     </button>
                   }
@@ -80,7 +115,13 @@ export default function FleetPage() {
               </div>
             )}
             
-            <FleetPagination />
+            {totalPages > 1 && (
+              <FleetPagination 
+                currentPage={state.page} 
+                totalPages={totalPages} 
+                setPage={state.setPage} 
+              />
+            )}
           </div>
 
         </div>
@@ -98,5 +139,13 @@ export default function FleetPage() {
       />
       <CompareBar selectedYachts={comparedYachtObjects} />
     </div>
+  );
+}
+
+export default function FleetPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen pt-32 flex justify-center items-start text-slate-500">Loading fleet...</div>}>
+      <FleetContent />
+    </React.Suspense>
   );
 }

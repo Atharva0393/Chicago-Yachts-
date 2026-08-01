@@ -1,6 +1,5 @@
-import { yachts } from "@/lib/constants/demo-data";
-
-export type Yacht = typeof yachts[0];
+import { dataService } from "@/services/data.service";
+import { Yacht } from "@/types";
 
 /**
  * Mocks an AI recommendation engine. 
@@ -13,6 +12,8 @@ export type Yacht = typeof yachts[0];
 export async function getRecommendations(currentYachtId: string, limit: number = 4): Promise<Yacht[]> {
   // Simulate network delay for realistic async behavior (prepping for real AI endpoint)
   await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const yachts = await dataService.getYachts();
 
   const currentYacht = yachts.find(y => y.id === currentYachtId);
   if (!currentYacht) return yachts.slice(0, limit);

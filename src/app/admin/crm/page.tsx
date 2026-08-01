@@ -1,16 +1,13 @@
-"use client"
+import { dataService } from "@/services/data.service"
+import { KanbanBoard } from "@/components/admin/crm/KanbanBoard"
 
-import { EmptyState } from "@/components/shared/EmptyState"
-import { MessageSquare } from "lucide-react"
+export default async function CRMPage() {
+  const customers = await dataService.getCustomers()
+  const bookings = await dataService.getBookings()
 
-export default function CRMPage() {
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col justify-center">
-      <EmptyState 
-        icon={MessageSquare}
-        title="CRM & Leads"
-        description="Track inquiries, follow-ups, and customer communications. This module is pending Phase 2 functionality."
-      />
+    <div className="h-full">
+      <KanbanBoard customers={customers} bookings={bookings} />
     </div>
   )
 }

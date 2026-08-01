@@ -1,9 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { yachts } from '@/lib/constants/demo-data';
-
-export type Yacht = typeof yachts[0];
+import { useYachts } from '@/hooks/useData';
+import { Yacht } from '@/types';
 
 interface WishlistContextType {
   savedYachts: Yacht[];
@@ -16,6 +15,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [savedYachtIds, setSavedYachtIds] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { yachts } = useYachts();
 
   // Hydrate from localStorage on mount
   useEffect(() => {

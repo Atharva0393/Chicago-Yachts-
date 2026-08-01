@@ -1,9 +1,10 @@
 import React from "react";
 import { Phone, Mail, MessageCircle, MapPin, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { companyInfo } from "@/data/company";
+import { dataService } from "@/services/data.service";
 
-export function ContactCards() {
+export async function ContactCards() {
+  const companyInfo = await dataService.getCompanyInfo();
   const cards = [
     {
       icon: <Phone className="w-6 h-6 stroke-[1.5]" />,

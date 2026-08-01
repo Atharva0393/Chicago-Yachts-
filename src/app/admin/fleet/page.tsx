@@ -1,16 +1,12 @@
-"use client"
+import { yachtRepository } from "@/server/repositories/yacht.repository"
+import { FleetTable } from "@/components/admin/FleetTable"
 
-import { EmptyState } from "@/components/shared/EmptyState"
-import { Anchor } from "lucide-react"
-
-export default function FleetPage() {
+export default async function FleetPage() {
+  const yachts = await yachtRepository.getAllYachts(true)
+  
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col justify-center">
-      <EmptyState 
-        icon={Anchor}
-        title="Fleet Management"
-        description="Add, edit, or remove yachts from your charter fleet. This module is pending Phase 2 functionality."
-      />
+    <div className="p-6 md:p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+      <FleetTable initialYachts={yachts} />
     </div>
   )
 }

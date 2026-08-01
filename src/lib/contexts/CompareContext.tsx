@@ -1,10 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { yachts } from '@/lib/constants/demo-data';
-
-// Determine the type from the demo data
-export type Yacht = typeof yachts[0];
+import { useYachts } from '@/hooks/useData';
+import { Yacht } from '@/types';
 
 interface CompareContextType {
   selectedYachts: Yacht[];
@@ -17,9 +15,11 @@ const CompareContext = createContext<CompareContextType | undefined>(undefined);
 
 export function CompareProvider({ children }: { children: React.ReactNode }) {
   const [selectedYachts, setSelectedYachts] = useState<Yacht[]>([]);
+  const { yachts } = useYachts();
 
   // Load from local storage on mount
   useEffect(() => {
+    if (yachts.length === 0) return;
     const saved = localStorage.getItem('compareYachts');
     if (saved) {
       try {
@@ -30,7 +30,7 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
         console.error("Failed to parse compare yachts", e);
       }
     }
-  }, []);
+  }, [yachts]);
 
   // Save to local storage when changed
   useEffect(() => {

@@ -3,10 +3,21 @@
 import React, { useEffect, useState } from "react"
 import Image from "next/image"
 import { Search, ShieldCheck, Anchor, CreditCard, Star, ChevronDown } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 export function Hero() {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
   const [scrollY, setScrollY] = useState(0)
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/fleet?q=${encodeURIComponent(searchQuery)}`)
+    } else {
+      router.push(`/fleet`)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,6 +71,9 @@ export function Hero() {
               <input 
                 id="where"
                 type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Navy Pier, Chicago" 
                 className="w-full bg-transparent text-[15px] font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none truncate"
               />
@@ -92,6 +106,7 @@ export function Hero() {
             </div>
 
             <button 
+              onClick={handleSearch}
               className="h-[60px] w-full md:w-[60px] rounded-full bg-slate-950 hover:bg-slate-800 text-white flex items-center justify-center shrink-0 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-slate-900/30 active:scale-95 mx-auto md:mx-0 mt-2 md:mt-0"
               aria-label="Search Yachts"
             >

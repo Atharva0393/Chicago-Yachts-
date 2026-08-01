@@ -1,16 +1,12 @@
-"use client"
+import { dataService } from "@/services/data.service"
+import { BookingsTable } from "@/components/admin/BookingsTable"
 
-import { EmptyState } from "@/components/shared/EmptyState"
-import { CalendarDays } from "lucide-react"
-
-export default function BookingsPage() {
+export default async function BookingsPage() {
+  const bookings = await dataService.getBookings()
+  
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col justify-center">
-      <EmptyState 
-        icon={CalendarDays}
-        title="Booking Management"
-        description="Review and manage customer charter bookings. This module is pending Phase 2 functionality."
-      />
+    <div className="p-6 md:p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+      <BookingsTable initialBookings={bookings} />
     </div>
   )
 }

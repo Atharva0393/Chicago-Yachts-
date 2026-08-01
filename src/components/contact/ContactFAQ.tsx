@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { Plus, Minus } from "lucide-react";
-import { faqs } from "@/data/faqs";
+import { useFAQs } from "@/hooks/useData";
 
 export function ContactFAQ() {
+  const { faqs } = useFAQs();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (

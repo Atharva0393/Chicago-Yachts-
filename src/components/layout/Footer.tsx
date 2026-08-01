@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { companyInfo } from "@/data/company"
+import { dataService } from "@/services/data.service"
 
 const Instagram = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -24,7 +24,8 @@ const Youtube = ({ className }: { className?: string }) => (
   </svg>
 )
 
-export function Footer({ className }: { className?: string }) {
+export async function Footer({ className }: { className?: string }) {
+  const companyInfo = await dataService.getCompanyInfo();
   return (
     <footer className={cn("border-t border-border/40 bg-background pt-16 pb-8", className)}>
       <div className="container grid gap-12 md:grid-cols-4 lg:grid-cols-5 mb-16">

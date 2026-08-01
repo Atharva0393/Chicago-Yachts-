@@ -4,7 +4,7 @@ import { BookingData } from "./BookingWizard"
 import { CheckCircle2, Copy, ExternalLink, Calendar, MapPin, Users } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
-import { Yacht } from "@/lib/constants/demo-data"
+import { Yacht } from "@/types"
 
 interface Props {
   bookingData: BookingData;

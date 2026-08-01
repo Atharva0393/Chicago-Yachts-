@@ -1,7 +1,7 @@
 "use client"
 
 import { useWishlist } from "@/lib/contexts/WishlistContext"
-import { yachts } from "@/lib/constants/demo-data"
+
 import { YachtCard } from "@/components/fleet/YachtCard"
 import { EmptyState } from "@/components/shared/EmptyState"
 import Link from "next/link"

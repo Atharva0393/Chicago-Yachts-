@@ -1,10 +1,11 @@
-import { yachts } from "@/lib/constants/demo-data";
+import { dataService } from "@/services/data.service";
 import { RecentlyViewedCarousel } from "@/components/shared/RecentlyViewedCarousel";
 import { Anchor, CalendarDays, MapPin, MessageSquare, ArrowRight, Download } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function CustomerDashboardOverview() {
+export default async function CustomerDashboardOverview() {
+  const yachts = await dataService.getYachts();
   // Mock Data
   const nextTrip = yachts[0]; // Assuming The Azimut 60 is the next booked trip
   const stats = [

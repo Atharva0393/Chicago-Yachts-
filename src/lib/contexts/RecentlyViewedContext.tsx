@@ -1,9 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { yachts } from '@/lib/constants/demo-data';
-
-export type Yacht = typeof yachts[0];
+import { useYachts } from '@/hooks/useData';
+import { Yacht } from '@/types';
 
 interface RecentlyViewedContextType {
   recentYachts: Yacht[];
@@ -15,6 +14,7 @@ const RecentlyViewedContext = createContext<RecentlyViewedContextType | undefine
 export function RecentlyViewedProvider({ children }: { children: React.ReactNode }) {
   const [recentYachtIds, setRecentYachtIds] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { yachts } = useYachts();
 
   useEffect(() => {
     const saved = localStorage.getItem('recentlyViewedYachts');

@@ -4,15 +4,18 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { companyInfo } from "@/data/company";
+import { useCompanyInfo } from "@/hooks/useData";
 
 export function EnquiryForm() {
+  const { companyInfo, loading } = useCompanyInfo();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitted(true);
   };
+
+  if (loading || !companyInfo) return null;
 
   if (isSubmitted) {
     return (

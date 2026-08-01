@@ -1,44 +1,46 @@
 import React from "react";
 import { Calendar, MessageSquare, PhoneCall, Search, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
-import { companyInfo } from "@/data/company";
+import { dataService } from "@/services/data.service";
 
-const options = [
-  {
-    icon: <Search className="w-5 h-5" />,
-    title: "Browse Fleet",
-    desc: "View our curated collection and book directly online.",
-    btnText: "Explore Yachts",
-    href: "/fleet",
-    primary: true
-  },
-  {
-    icon: <MessageSquare className="w-5 h-5" />,
-    title: "Chat on WhatsApp",
-    desc: "Instant replies for quick availability checks.",
-    btnText: "Start Chat",
-    href: "#whatsapp",
-    primary: false
-  },
-  {
-    icon: <Phone className="w-5 h-5" />,
-    title: "Call Concierge",
-    desc: "Speak directly with our booking specialists.",
-    btnText: companyInfo.phone,
-    href: `tel:${companyInfo.phone.replace(/[^0-9+]/g, '')}`,
-    primary: false
-  },
-  {
-    icon: <Calendar className="w-5 h-5" />,
-    title: "Schedule Consultation",
-    desc: "Plan a complex event? Let's talk through the details.",
-    btnText: "Book Time",
-    href: "#calendar",
-    primary: false
-  }
-];
+export async function InstantBooking() {
+  const companyInfo = await dataService.getCompanyInfo();
+  
+  const options = [
+    {
+      icon: <Search className="w-5 h-5" />,
+      title: "Browse Fleet",
+      desc: "View our curated collection and book directly online.",
+      btnText: "Explore Yachts",
+      href: "/fleet",
+      primary: true
+    },
+    {
+      icon: <MessageSquare className="w-5 h-5" />,
+      title: "Chat on WhatsApp",
+      desc: "Instant replies for quick availability checks.",
+      btnText: "Start Chat",
+      href: "#whatsapp",
+      primary: false
+    },
+    {
+      icon: <Phone className="w-5 h-5" />,
+      title: "Call Concierge",
+      desc: "Speak directly with our booking specialists.",
+      btnText: companyInfo.phone,
+      href: `tel:${companyInfo.phone.replace(/[^0-9+]/g, '')}`,
+      primary: false
+    },
+    {
+      icon: <Calendar className="w-5 h-5" />,
+      title: "Schedule Consultation",
+      desc: "Plan a complex event? Let's talk through the details.",
+      btnText: "Book Time",
+      href: "#calendar",
+      primary: false
+    }
+  ];
 
-export function InstantBooking() {
   return (
     <div className="flex flex-col gap-4">
       <h3 className="text-xl font-medium text-slate-900 mb-2">Instant Booking Options</h3>

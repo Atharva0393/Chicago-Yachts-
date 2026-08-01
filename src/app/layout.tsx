@@ -8,6 +8,7 @@ import { WishlistProvider } from "@/lib/contexts/WishlistContext";
 import { RecentlyViewedProvider } from "@/lib/contexts/RecentlyViewedContext";
 import { CompareDrawer } from "@/components/compare/CompareDrawer";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { AiConcierge } from "@/components/chat/AiConcierge";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
                 </main>
                 <Footer />
                 <CompareDrawer />
+                <AiConcierge />
               </CompareProvider>
             </WishlistProvider>
           </RecentlyViewedProvider>

@@ -1,17 +1,6 @@
 import { PartyPopper, Heart, Briefcase, Sunset, Compass, GlassWater, Camera, Ship, Map, Calendar, Anchor, Music, Sparkles } from "lucide-react";
 
-export interface Experience {
-  id: string;
-  title: string;
-  description: string;
-  icon: any;
-  image: string;
-  colSpan?: string;
-  guests: string;
-  duration: string;
-  price: number;
-  yachts: string;
-}
+import { Experience } from "@/types";
 
 export const experiences: Experience[] = [
   {

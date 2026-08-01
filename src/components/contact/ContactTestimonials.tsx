@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
-import { testimonials } from "@/data/testimonials";
+import { useTestimonials } from "@/hooks/useData";
 
 export function ContactTestimonials() {
+  const { testimonials, loading } = useTestimonials();
   const [current, setCurrent] = useState(0);
 
   const next = () => setCurrent((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
   const prev = () => setCurrent((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
+
+  if (loading || testimonials.length === 0) return null;
 
   useEffect(() => {
     const timer = setInterval(next, 8000);

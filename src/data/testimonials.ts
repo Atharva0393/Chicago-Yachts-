@@ -1,4 +1,6 @@
-export const testimonials = [
+import { Testimonial } from "@/types";
+
+export const testimonials: Testimonial[] = [
   {
     quote:
       "Captain Pete made the experience of touring Miami so memorable. I would book through Chicago Yachts again with no worries.",

@@ -1,5 +1,5 @@
 import { RevenueChart } from "@/components/admin/RevenueChart"
-import { yachts } from "@/lib/constants/demo-data"
+import { dataService } from "@/services/data.service"
 import { 
   DollarSign, 
   CalendarDays, 
@@ -15,7 +15,21 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const yachts = await dataService.getYachts();
+  const bookings = await dataService.getBookings();
+  
+  // Calculate dynamic metrics
+  const totalRevenue = bookings.reduce((sum, b) => sum + (b.status !== "CANCELLED" ? b.totalPrice : 0), 0);
+  const pendingPayments = bookings.reduce((sum, b) => sum + (b.status === "PENDING" ? b.totalPrice : 0), 0);
+  const todaysBookings = bookings.filter(b => {
+    const bDate = new Date(b.date);
+    const today = new Date();
+    return bDate.getDate() === today.getDate() && bDate.getMonth() === today.getMonth() && bDate.getFullYear() === today.getFullYear();
+  }).length;
+  const activeYachts = yachts.filter(y => y.availabilityStatus !== "Fully Booked").length;
+  const fleetAvailability = Math.round((activeYachts / yachts.length) * 100);
+
   return (
     <div className="p-6 md:p-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
       
@@ -47,8 +61,8 @@ export default function AdminDashboard() {
             </span>
           </div>
           <div>
-            <div className="text-sm text-slate-500 font-medium mb-1">Total Revenue (30d)</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">$124,500</div>
+            <div className="text-sm text-slate-500 font-medium mb-1">Total Revenue</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">${totalRevenue.toLocaleString()}</div>
           </div>
         </div>
 
@@ -63,7 +77,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <div className="text-sm text-slate-500 font-medium mb-1">Today's Bookings</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">8</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">{todaysBookings}</div>
           </div>
         </div>
 
@@ -73,12 +87,12 @@ export default function AdminDashboard() {
               <Clock className="h-5 w-5" />
             </div>
             <span className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md">
-              2 Overdue
+              Live
             </span>
           </div>
           <div>
             <div className="text-sm text-slate-500 font-medium mb-1">Pending Payments</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">$12,400</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">${pendingPayments.toLocaleString()}</div>
           </div>
         </div>
 
@@ -87,13 +101,13 @@ export default function AdminDashboard() {
             <div className="h-10 w-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
               <Anchor className="h-5 w-5" />
             </div>
-            <span className="flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md">
-              -2% <ArrowDownRight className="h-3 w-3" />
+            <span className="flex items-center gap-1 text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
+              Real-time
             </span>
           </div>
           <div>
             <div className="text-sm text-slate-500 font-medium mb-1">Fleet Availability</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">72%</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">{fleetAvailability}%</div>
           </div>
         </div>
 
