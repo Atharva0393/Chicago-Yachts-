@@ -137,21 +137,27 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
 
     const fetchQuote = async () => {
       setQuoteStatus("LOADING");
-      const addonsTotal = selectedAddons.reduce((sum, addon) => sum + addon.price, 0);
-      
-      const res = await getBookingQuoteAction({
-        yachtId,
-        dateStr: formatDate(selectedDate),
-        timeSlot,
-        duration,
-        guests,
-        addonsTotal
-      });
+      try {
+        const addonsTotal = selectedAddons.reduce((sum, addon) => sum + addon.price, 0);
+        
+        const res = await getBookingQuoteAction({
+          yachtId,
+          dateStr: formatDate(selectedDate),
+          timeSlot,
+          duration,
+          guests,
+          addonsTotal
+        });
 
-      setQuoteStatus(res.status);
-      if (res.status === "SUCCESS" && res.quote) {
-        setQuote(res.quote);
-      } else {
+        setQuoteStatus(res.status);
+        if (res.status === "SUCCESS" && res.quote) {
+          setQuote(res.quote);
+        } else {
+          setQuote(null);
+        }
+      } catch (err) {
+        console.error("Failed to fetch quote from server action:", err);
+        setQuoteStatus("PRICING_NOT_CONFIGURED"); // Fallback to allow UI to recover
         setQuote(null);
       }
     };
