@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
@@ -20,6 +21,7 @@ const BrandLogo = () => (
 export function Navbar({ className }: { className?: string }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
   const [isScrolled, setIsScrolled] = React.useState(false)
+  const pathname = usePathname()
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -47,26 +49,39 @@ export function Navbar({ className }: { className?: string }) {
           </Link>
 
           <nav className="hidden md:flex items-center gap-10 text-sm font-medium" aria-label="Main Navigation">
-            {["Home", "Destinations", "Experiences", "Fleet", "About", "Contact"].map((item) => (
-              <Link 
-                key={item}
-                href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-                className="relative text-slate-600 hover:text-slate-900 transition-colors py-2 group"
-              >
-                {item}
-                {/* Premium hover underline animation */}
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-slate-900 scale-x-0 origin-right transition-transform duration-300 ease-out group-hover:scale-x-100 group-hover:origin-left" />
-              </Link>
-            ))}
+            {["Home", "Destinations", "Experiences", "Fleet", "About", "Contact"].map((item) => {
+              const href = item === "Home" ? "/" : `/${item.toLowerCase()}`
+              const isActive = pathname === href || (href !== "/" && pathname?.startsWith(href))
+              
+              return (
+                <Link 
+                  key={item}
+                  href={href}
+                  className={cn(
+                    "relative py-2 group transition-colors",
+                    isActive ? "text-slate-900 font-semibold" : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  {item}
+                  {/* Premium hover underline animation */}
+                  <span className={cn(
+                    "absolute bottom-0 left-0 w-full h-[2px] bg-slate-900 origin-right transition-transform duration-300 ease-out group-hover:scale-x-100 group-hover:origin-left",
+                    isActive ? "scale-x-100" : "scale-x-0"
+                  )} />
+                </Link>
+              )
+            })}
           </nav>
 
           <div className="hidden md:flex items-center gap-6">
             <Link href="/login" className="text-sm font-semibold text-slate-900 hover:text-slate-600 transition-colors">
               Sign In
             </Link>
-            <Button className="rounded-full px-7 bg-slate-900 hover:bg-slate-800 text-white min-h-[40px] text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5">
-              Book Now
-            </Button>
+            <Link href="/fleet">
+              <Button className="rounded-full px-7 bg-slate-900 hover:bg-slate-800 text-white min-h-[40px] text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5">
+                Book Now
+              </Button>
+            </Link>
           </div>
 
           <button 

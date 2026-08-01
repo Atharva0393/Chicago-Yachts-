@@ -22,7 +22,7 @@ export function FleetSort({ totalCount }: FleetSortProps) {
 
         {/* Sort Dropdown */}
         <div className="relative flex-1 sm:flex-none">
-          <select className="h-11 w-full sm:w-48 appearance-none rounded-full border border-slate-200 bg-white px-5 pr-10 text-sm font-medium text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 cursor-pointer transition-colors shadow-sm">
+          <select className="h-11 w-full sm:w-48 appearance-none rounded-full border border-slate-200 bg-white pl-4 pr-10 text-sm font-medium text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 cursor-pointer transition-colors shadow-sm truncate">
             <option>Recommended</option>
             <option>Most Popular</option>
             <option>Price: Low to High</option>

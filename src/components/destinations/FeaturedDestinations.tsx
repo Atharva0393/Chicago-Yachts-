@@ -11,7 +11,7 @@ const destinations = [
     popularFor: "Fireworks, Entertainment, Sightseeing",
     duration: "2-4 Hours",
     bestTime: "Summer Evenings",
-    image: "https://images.unsplash.com/photo-1596484552834-6a58f850d0a1?q=80&w=2070&auto=format&fit=crop"
+    image: "/images/destinations/dest_navypier_1785520881845.png"
   },
   {
     id: "chicago-river",
@@ -20,7 +20,7 @@ const destinations = [
     popularFor: "Architecture Tours, Dining",
     duration: "2-3 Hours",
     bestTime: "Late Afternoon",
-    image: "https://images.unsplash.com/photo-1494522855154-9297ac14b55f?q=80&w=2070&auto=format&fit=crop"
+    image: "/images/destinations/dest_chicagoriver.png"
   },
   {
     id: "lake-michigan",
@@ -29,7 +29,7 @@ const destinations = [
     popularFor: "Sailing, Swimming, Sunsets",
     duration: "4-8 Hours",
     bestTime: "Summer Days",
-    image: "https://images.unsplash.com/photo-1582291560662-35f11181f087?q=80&w=2070&auto=format&fit=crop"
+    image: "/images/destinations/dest_lakemichigan.png"
   },
   {
     id: "monroe-harbor",
@@ -38,7 +38,7 @@ const destinations = [
     popularFor: "Quick Excursions, Photography",
     duration: "2 Hours",
     bestTime: "Morning",
-    image: "https://images.unsplash.com/photo-1473876637954-4b493d59fd97?q=80&w=2070&auto=format&fit=crop"
+    image: "/images/destinations/dest_monroeharbor.png"
   },
   {
     id: "burnham-harbor",
@@ -47,7 +47,7 @@ const destinations = [
     popularFor: "Family Trips, Quiet Cruising",
     duration: "3-5 Hours",
     bestTime: "Afternoon",
-    image: "https://images.unsplash.com/photo-1517409208077-d86b72d6ff5b?q=80&w=2070&auto=format&fit=crop"
+    image: "/images/destinations/dest_burnhamharbor.png"
   }
 ];
 

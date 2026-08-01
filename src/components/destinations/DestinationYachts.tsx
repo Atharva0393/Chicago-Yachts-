@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Users, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -43,14 +44,16 @@ export function DestinationYachts() {
               Our hand-picked selection of luxury vessels stationed across Chicago's most iconic waters.
             </p>
           </div>
-          <Button variant="outline" className="rounded-full px-6 transition-luxury hover:bg-slate-900 hover:text-white border-slate-200">
-            View Full Fleet
-          </Button>
+          <Link href="/fleet">
+            <Button variant="outline" className="rounded-full px-6 transition-luxury hover:bg-slate-900 hover:text-white border-slate-200">
+              View Full Fleet
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {yachts.map((yacht) => (
-            <div key={yacht.id} className="group bg-white rounded-[24px] p-4 border border-slate-100 hover:shadow-premium transition-luxury flex flex-col">
+            <Link href={`/fleet/${yacht.id}`} key={yacht.id} className="group bg-white rounded-[24px] p-4 border border-slate-100 hover:shadow-premium transition-luxury flex flex-col block">
               <div className="relative h-60 w-full rounded-[16px] overflow-hidden mb-6">
                 <Image
                   src={yacht.image}
@@ -79,12 +82,12 @@ export function DestinationYachts() {
                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-0.5">Starting From</span>
                     <span className="text-lg font-semibold text-slate-900">${yacht.price}<span className="text-sm text-slate-400 font-normal">/hr</span></span>
                   </div>
-                  <Button className="rounded-full px-6 bg-slate-900 hover:bg-slate-800 text-white transition-luxury">
+                  <div className="rounded-full px-6 py-2 text-sm font-medium bg-slate-900 text-white transition-luxury group-hover:bg-slate-800">
                     Book Now
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

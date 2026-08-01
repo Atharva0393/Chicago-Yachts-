@@ -1,28 +1,7 @@
 import Link from "next/link";
+import { experiences } from "@/data/experiences";
 
 export function Experiences() {
-  const experiences = [
-    {
-      title: "Sunset Cruises",
-      image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2940&auto=format&fit=crop",
-      colSpan: "md:col-span-2 md:row-span-2",
-    },
-    {
-      title: "Corporate Events",
-      image: "https://images.unsplash.com/photo-1505322022379-7c3353ee6291?q=80&w=3000&auto=format&fit=crop",
-      colSpan: "md:col-span-1 md:row-span-1",
-    },
-    {
-      title: "Luxury Dining",
-      image: "https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2940&auto=format&fit=crop",
-      colSpan: "md:col-span-1 md:row-span-1",
-    },
-    {
-      title: "Private Parties",
-      image: "https://images.unsplash.com/photo-1533147670608-2a2f9775d3a4?q=80&w=2950&auto=format&fit=crop",
-      colSpan: "md:col-span-2 md:row-span-1",
-    }
-  ];
 
   return (
     <section className="w-full py-24 md:py-32 bg-background">
@@ -41,11 +20,8 @@ export function Experiences() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[800px] md:h-[600px]">
-          {experiences.map((exp, index) => (
-            <div 
-              key={index} 
-              className={`relative rounded-3xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-xl transition-luxury ${exp.colSpan}`}
-            >
+          {experiences.slice(0, 4).map((exp, index) => (
+            <Link href={`/experiences#${exp.id}`} key={index} className={`relative rounded-3xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-xl transition-luxury block ${exp.colSpan}`}>
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-[3000ms] ease-out group-hover:scale-105"
                 style={{ backgroundImage: `url('${exp.image}')` }}
@@ -57,7 +33,7 @@ export function Experiences() {
                   Discover More <span>→</span>
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

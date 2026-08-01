@@ -52,7 +52,7 @@ export function DestinationExperiences() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {category.experiences.map((exp) => (
-                  <div key={exp.name} className="group relative h-[300px] rounded-[24px] overflow-hidden">
+                  <Link href="/experiences" key={exp.name} className="group relative h-[300px] rounded-[24px] overflow-hidden block">
                     <Image
                       src={exp.image}
                       alt={exp.name}
@@ -67,7 +67,7 @@ export function DestinationExperiences() {
                         <ArrowRight className="w-5 h-5" />
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

@@ -15,8 +15,23 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Chicago Yachts | Luxury Charters",
-  description: "Experience the ultimate luxury on the waters of Chicago. Premium yacht charters for those who demand the exceptional.",
+  title: {
+    default: "Chicago Yachts | Premium Luxury Yacht Charters",
+    template: "%s | Chicago Yachts",
+  },
+  description: "Experience the ultimate luxury on the waters of Chicago. Captained charters, instant booking, verified owners and five-star crews for corporate events, parties, and sunset cruises.",
+  keywords: [
+    "chicago yacht rental",
+    "luxury yacht charter chicago",
+    "boat rental chicago",
+    "lake michigan yacht charter",
+    "chicago playpen boat rental",
+  ],
+  openGraph: {
+    title: "Chicago Yachts | Premium Luxury Yacht Charters",
+    description: "Experience the ultimate luxury on the waters of Chicago. Captained charters, instant booking, verified owners and five-star crews.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

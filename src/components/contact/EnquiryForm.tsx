@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { companyInfo } from "@/data/company";
 
 export function EnquiryForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -113,11 +114,10 @@ export function EnquiryForm() {
           <label className="text-xs font-medium uppercase tracking-wider text-slate-500">Message / Special Requests</label>
           <textarea rows={4} className="w-full bg-slate-50 border-transparent rounded-xl p-4 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors text-sm resize-none" placeholder="Tell us about your ideal experience, catering preferences, or any special requirements..."></textarea>
         </div>
-
         <div className="flex items-start gap-3">
           <input required type="checkbox" id="privacy" className="mt-1 border-slate-300 rounded text-slate-900 focus:ring-slate-900" />
           <label htmlFor="privacy" className="text-xs text-slate-500 font-light leading-relaxed">
-            I agree to the <Link href="/privacy" className="underline hover:text-slate-900">Privacy Policy</Link> and consent to being contacted regarding my enquiry.
+            I agree to the <Link href={companyInfo.policies.privacy} className="underline hover:text-slate-900">Privacy Policy</Link> and consent to being contacted regarding my enquiry.
           </label>
         </div>
 

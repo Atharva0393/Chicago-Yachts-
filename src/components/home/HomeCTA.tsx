@@ -18,8 +18,8 @@ export function HomeCTA() {
           Book your yacht today and experience Chicago from the most exclusive vantage point.
         </p>
         
-        <Link href="/book" className="inline-flex h-16 items-center justify-center rounded-[20px] bg-white px-12 text-lg font-medium text-primary shadow-2xl hover-lift hover:text-accent transition-luxury">
-          Book Your Yacht Today
+        <Link href="/fleet" className="inline-flex h-16 items-center justify-center rounded-[20px] bg-white px-12 text-lg font-medium text-primary shadow-2xl hover-lift hover:text-accent transition-luxury">
+          Reserve Your Yacht
         </Link>
       </div>
     </section>

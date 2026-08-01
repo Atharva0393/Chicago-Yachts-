@@ -1,4 +1,5 @@
 import React from "react";
+import { companyInfo } from "@/data/company";
 
 export function BusinessInfo() {
   return (
@@ -13,8 +14,8 @@ export function BusinessInfo() {
         <div className="space-y-8">
           <div>
             <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Office Hours</h4>
-            <p className="text-lg font-light text-slate-200">Monday – Sunday</p>
-            <p className="text-sm font-light text-slate-400">8:00 AM – 10:00 PM CST</p>
+            <p className="text-lg font-light text-slate-200">{companyInfo.operatingHours}</p>
+            <p className="text-sm font-light text-slate-400">Available Daily</p>
           </div>
           
           <div>

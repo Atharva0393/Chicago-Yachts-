@@ -1,33 +1,16 @@
 import Link from "next/link";
 import { Anchor, Users, Ruler } from "lucide-react";
+import { yachts as allYachts } from "@/lib/constants/demo-data";
 
 export function FeaturedFleet() {
-  const yachts = [
-    {
-      id: 1,
-      name: "The Azimut 60",
-      capacity: 12,
-      length: "60 ft",
-      price: "$1,200",
-      image: "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2944&auto=format&fit=crop",
-    },
-    {
-      id: 2,
-      name: "Sunseeker Manhattan",
-      capacity: 15,
-      length: "68 ft",
-      price: "$1,800",
-      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2940&auto=format&fit=crop",
-    },
-    {
-      id: 3,
-      name: "Riva Corsaro",
-      capacity: 20,
-      length: "100 ft",
-      price: "$4,500",
-      image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=2968&auto=format&fit=crop",
-    }
-  ];
+  const yachts = [...allYachts].sort((a, b) => b.length - a.length).slice(0, 3).map(y => ({
+    id: y.id,
+    name: y.name,
+    capacity: y.capacity,
+    length: `${y.length} ft`,
+    price: `$${y.pricePerHour * 4}`,
+    image: y.images?.[0] || "",
+  }));
 
   return (
     <section className="w-full py-24 md:py-32 bg-muted/20">

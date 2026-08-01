@@ -18,7 +18,7 @@ export function FleetHero() {
         </div>
 
         {/* Floating Search Bar */}
-        <div className="max-w-4xl mx-auto bg-white rounded-full p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col md:flex-row items-center gap-2 relative z-20 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 fill-mode-both">
+        <div className="max-w-4xl mx-auto bg-white rounded-[2rem] md:rounded-full p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col md:flex-row items-center gap-2 relative z-20 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 fill-mode-both">
           
           <div className="flex-1 flex items-center w-full px-4 py-2 hover:bg-slate-50 rounded-full transition-colors cursor-text group">
             <MapPin className="w-5 h-5 text-slate-400 group-focus-within:text-slate-900 transition-colors shrink-0" />

@@ -3,6 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { X } from "lucide-react"
 
 interface MobileNavProps {
@@ -12,6 +13,7 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ isOpen, onClose, className }: MobileNavProps) {
+  const pathname = usePathname();
   if (!isOpen) return null;
 
   return (
@@ -33,15 +35,32 @@ export function MobileNav({ isOpen, onClose, className }: MobileNavProps) {
         </div>
         
         <nav className="flex flex-col gap-6 text-2xl font-medium tracking-tight mt-8" aria-label="Mobile Main Navigation">
-          <Link href="/fleet" onClick={onClose} className="hover:text-primary transition-colors flex items-center min-h-[44px]">Fleet</Link>
-          <Link href="/experiences" onClick={onClose} className="hover:text-primary transition-colors flex items-center min-h-[44px]">Experiences</Link>
-          <Link href="/about" onClick={onClose} className="hover:text-primary transition-colors flex items-center min-h-[44px]">About</Link>
-          <Link href="/contact" onClick={onClose} className="hover:text-primary transition-colors flex items-center min-h-[44px]">Contact</Link>
+          {["Destinations", "Experiences", "Fleet", "About", "Contact"].map((item) => {
+            const href = `/${item.toLowerCase()}`
+            const isActive = pathname?.startsWith(href)
+            return (
+              <Link 
+                key={item} 
+                href={href} 
+                onClick={onClose} 
+                className={cn(
+                  "transition-colors flex items-center min-h-[44px]",
+                  isActive ? "text-primary font-semibold" : "text-foreground hover:text-primary"
+                )}
+              >
+                {item}
+              </Link>
+            )
+          })}
         </nav>
         
         <div className="mt-auto flex flex-col gap-4 pb-8">
-          <button className="w-full h-14 rounded-full border border-border/60 font-medium tracking-wide">Sign In</button>
-          <button className="w-full h-14 rounded-full bg-primary text-primary-foreground font-medium tracking-wide">Book Now</button>
+          <Link href="/login" onClick={onClose}>
+            <button className="w-full h-14 rounded-full border border-border/60 font-medium tracking-wide">Sign In</button>
+          </Link>
+          <Link href="/fleet" onClick={onClose}>
+            <button className="w-full h-14 rounded-full bg-slate-900 text-white hover:bg-slate-800 font-medium tracking-wide">Book Now</button>
+          </Link>
         </div>
       </div>
     </div>

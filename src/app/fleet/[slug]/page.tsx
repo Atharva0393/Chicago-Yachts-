@@ -14,92 +14,51 @@ import { YachtFAQ } from "@/components/yacht/YachtFAQ";
 import { SimilarYachts } from "@/components/yacht/SimilarYachts";
 import { YachtCTA } from "@/components/yacht/YachtCTA";
 
-// Mock Data fetching function (Future Prisma integration)
-const getYachtBySlug = async (slug: string) => {
-  // In a real app, this would be: await prisma.yacht.findUnique({ where: { slug } })
-  const mockDB: Record<string, any> = {
-    "azimut-60": {
-      id: "1",
-      name: "The Azimut 60",
-      manufacturer: "Azimut",
-      rating: 4.9,
-      reviews: 128,
-      location: "Navy Pier, Chicago",
-      price: 1200,
-      isLuxury: true,
-      verified: true,
-      description: "Experience unparalleled luxury aboard The Azimut 60. Perfectly suited for cruising the Chicago skyline, this vessel offers spacious decks, a premium sound system, and a dedicated crew to cater to your every need. With its sleek Italian design, it stands out in any harbor.",
-      images: [
-        "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2044&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=2074&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1577977464038-09099c2ea557?q=80&w=2000&auto=format&fit=crop"
-      ],
-      specs: {
-        year: "2023",
-        length: "60 ft",
-        beam: "16.5 ft",
-        cabins: 3,
-        bathrooms: 2,
-        sleepingCapacity: 6,
-        maxGuests: 12,
-        cruisingSpeed: "22 knots"
-      },
-      amenities: [
-        "Premium Audio System", "High-Speed WiFi", "Bluetooth Connectivity",
-        "Outdoor Dining Area", "Indoor Lounge", "Sun Deck",
-        "Swim Platform", "Air Conditioning", "Fully Equipped Kitchen",
-        "Floating Mat"
-      ]
-    },
-    "sunseeker-manhattan": {
-      id: "2",
-      name: "Sunseeker Manhattan",
-      manufacturer: "Sunseeker",
-      rating: 4.8,
-      reviews: 94,
-      location: "Burnham Harbor",
-      price: 1800,
-      isLuxury: true,
-      verified: true,
-      description: "The Sunseeker Manhattan provides a masterful combination of space and light. With panoramic hull and saloon windows, it's the perfect vessel for entertaining large groups against the Chicago skyline.",
-      images: [
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1621277227092-28c0b25e79ba?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2044&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1540946485063-a40da27545f8?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=2074&auto=format&fit=crop"
-      ],
-      specs: {
-        year: "2024",
-        length: "68 ft",
-        beam: "17 ft",
-        cabins: 4,
-        bathrooms: 3,
-        sleepingCapacity: 8,
-        maxGuests: 15,
-        cruisingSpeed: "24 knots"
-      },
-      amenities: [
-        "Jacuzzi", "Premium Audio System", "High-Speed WiFi", 
-        "Outdoor Dining Area", "Sun Deck",
-        "Swim Platform", "Air Conditioning", "Fully Equipped Kitchen",
-        "Water Toys"
-      ]
-    }
-  };
+import { yachts } from "@/lib/constants/demo-data";
 
-  return mockDB[slug] || mockDB["azimut-60"]; // Fallback to azimut-60 for demo purposes
+// Fetch from centralized fleet data
+const getYachtBySlug = async (slug: string) => {
+  const y = yachts.find(y => y.id === slug) || yachts[0];
+  return {
+    id: y.id,
+    name: y.name,
+    manufacturer: y.manufacturer,
+    rating: y.rating,
+    reviews: y.reviewCount,
+    location: y.location,
+    price: y.pricePerHour * 4,
+    isLuxury: y.pricePerHour > 500,
+    verified: true,
+    description: y.description,
+    images: y.images,
+    specs: {
+      year: y.year.toString(),
+      length: `${y.length} ft`,
+      beam: "16 ft", // Placeholder
+      cabins: y.cabins,
+      bathrooms: y.bathrooms,
+      sleepingCapacity: Math.floor(y.capacity / 2),
+      maxGuests: y.capacity,
+      cruisingSpeed: "20 knots" // Placeholder
+    },
+    amenities: y.amenities
+  };
 };
 
-const getSimilarYachts = async () => {
-  return [
-    { id: "3", name: "Riva Corsaro", manufacturer: "Riva", price: 4500, length: "100 ft", capacity: 20, rating: 5.0, reviews: 42, location: "DuSable Harbor", image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?q=80&w=2074&auto=format&fit=crop", isLuxury: true },
-    { id: "4", name: "Princess 72", manufacturer: "Princess", price: 2100, length: "72 ft", capacity: 14, rating: 4.7, reviews: 86, location: "Belmont Harbor", image: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?q=80&w=2070&auto=format&fit=crop", instantBook: true },
-    { id: "5", name: "Sea Ray L650", manufacturer: "Sea Ray", price: 1500, length: "65 ft", capacity: 12, rating: 4.9, reviews: 210, location: "Navy Pier, Chicago", image: "https://images.unsplash.com/photo-1577977464038-09099c2ea557?q=80&w=2000&auto=format&fit=crop", verified: true },
-    { id: "6", name: "Galeon 500 Fly", manufacturer: "Galeon", price: 950, length: "50 ft", capacity: 10, rating: 4.6, reviews: 112, location: "Burnham Harbor", image: "https://images.unsplash.com/photo-1621277227092-28c0b25e79ba?q=80&w=2070&auto=format&fit=crop" }
-  ];
+const getSimilarYachts = async (currentId: string) => {
+  return yachts.filter(y => y.id !== currentId).slice(0, 4).map(y => ({
+     id: y.id,
+     name: y.name,
+     manufacturer: y.manufacturer,
+     price: y.pricePerHour * 4,
+     length: `${y.length} ft`,
+     capacity: y.capacity,
+     rating: y.rating,
+     reviews: y.reviewCount,
+     location: y.location,
+     image: y.images[0],
+     isLuxury: y.pricePerHour > 500
+  }));
 };
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -112,7 +71,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function YachtDetailPage({ params }: { params: { slug: string } }) {
   const yacht = await getYachtBySlug(params.slug);
-  const similarYachts = await getSimilarYachts();
+  const similarYachts = await getSimilarYachts(params.slug);
 
   if (!yacht) {
     notFound();

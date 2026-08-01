@@ -52,7 +52,7 @@ export function Hero() {
 
         {/* Interactive Search Pill */}
         <div className="mt-12 max-w-3xl animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-300 fill-mode-both">
-          <div className="bg-white rounded-full p-2 pl-3 md:pl-2 flex flex-col md:flex-row shadow-2xl shadow-black/30 relative z-20">
+          <div className="bg-white rounded-[2rem] md:rounded-full p-2 md:pl-2 flex flex-col md:flex-row shadow-2xl shadow-black/30 relative z-20 gap-2 md:gap-0">
             
             {/* WHERE */}
             <div className="flex-1 flex flex-col justify-center px-6 py-3 rounded-full hover:bg-slate-100/80 transition-colors focus-within:bg-slate-50 focus-within:ring-2 focus-within:ring-slate-300 cursor-text group">

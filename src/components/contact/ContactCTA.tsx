@@ -18,9 +18,9 @@ export function ContactCTA() {
               Browse Our Fleet
             </Button>
           </Link>
-          <Link href="#whatsapp" className="w-full sm:w-auto">
-            <Button variant="outline" className="w-full rounded-full px-10 h-14 border-slate-200 bg-white hover:bg-slate-50 text-slate-900 text-base font-medium transition-luxury hover-lift">
-              Chat on WhatsApp
+          <Link href="https://wa.me/1234567890" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full h-14 rounded-full px-8 text-sm font-medium border-slate-200 hover:bg-slate-50 transition-luxury">
+              Message on WhatsApp
             </Button>
           </Link>
         </div>

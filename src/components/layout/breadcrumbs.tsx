@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 export function Breadcrumbs({ items, className }: { items: { label: string, href?: string }[], className?: string }) {
   return (
@@ -9,7 +10,7 @@ export function Breadcrumbs({ items, className }: { items: { label: string, href
           <li key={index} className="inline-flex items-center">
             {index > 0 && <span className="mx-2">/</span>}
             {item.href ? (
-              <a href={item.href} className="hover:text-foreground transition-colors">{item.label}</a>
+              <Link href={item.href} className="hover:text-foreground transition-colors">{item.label}</Link>
             ) : (
               <span className="text-foreground font-medium">{item.label}</span>
             )}

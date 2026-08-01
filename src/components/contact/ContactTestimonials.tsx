@@ -2,24 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
-
-const testimonials = [
-  {
-    quote: "The concierge team made booking an absolute breeze. They handled catering, route planning, and even organized a surprise birthday cake. Truly white-glove service from the first email.",
-    author: "Amanda Jenkins",
-    role: "Birthday Celebration"
-  },
-  {
-    quote: "We needed a last-minute charter for a corporate client. The Chicago Yachts team responded within 10 minutes and had a stunning vessel ready in hours. Unmatched professionalism.",
-    author: "Robert Vance",
-    role: "Corporate Event"
-  },
-  {
-    quote: "Planning a proposal is stressful, but the concierge team here took care of everything. They coordinated with my photographer and the captain seamlessly. She said yes!",
-    author: "Michael T.",
-    role: "Engagement Cruise"
-  }
-];
+import { testimonials } from "@/data/testimonials";
 
 export function ContactTestimonials() {
   const [current, setCurrent] = useState(0);
@@ -49,7 +32,7 @@ export function ContactTestimonials() {
               </p>
               <div>
                 <h4 className="text-slate-900 font-medium text-sm">{test.author}</h4>
-                <span className="text-slate-500 text-xs tracking-widest uppercase">{test.role}</span>
+                <span className="text-slate-500 text-xs tracking-widest uppercase">{test.trip}</span>
               </div>
             </div>
           ))}

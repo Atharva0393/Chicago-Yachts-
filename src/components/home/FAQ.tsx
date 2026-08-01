@@ -4,31 +4,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { faqs } from "@/data/faqs";
 
 export function FAQ() {
-  const faqs = [
-    {
-      question: "What is included in the charter price?",
-      answer: "Our standard charter includes the yacht, a licensed captain, professional crew, fuel for local cruising, basic non-alcoholic beverages, and all necessary safety equipment. Premium catering and bespoke additions are billed separately."
-    },
-    {
-      question: "Can we bring our own food and beverages?",
-      answer: "Yes, you are welcome to bring your own provisions. However, we highly recommend utilizing our premium catering partners for a truly seamless luxury experience on the water."
-    },
-    {
-      question: "What happens in case of inclement weather?",
-      answer: "Your safety is our priority. If the captain determines conditions are unsafe for departure, we will work with you to reschedule your charter or provide a full refund according to our weather policy."
-    },
-    {
-      question: "How far in advance should we book?",
-      answer: "For weekend dates and peak summer season (June-August), we recommend booking at least 4-6 weeks in advance. However, we always try to accommodate last-minute requests when availability permits."
-    },
-    {
-      question: "Is there a minimum charter duration?",
-      answer: "Our standard minimum charter duration is 4 hours, which provides the perfect amount of time to enjoy the Chicago skyline, the playpen, or a scenic river cruise."
-    }
-  ];
-
   return (
     <section className="w-full py-24 md:py-32 bg-background">
       <div className="container mx-auto px-4 md:px-8 flex flex-col lg:flex-row gap-16">
@@ -51,10 +29,10 @@ export function FAQ() {
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`} className="border-b border-border/50 py-2">
                 <AccordionTrigger className="text-lg font-medium hover:no-underline hover:text-accent transition-luxury text-left">
-                  {faq.question}
+                  {faq.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed text-base pt-2 pb-6">
-                  {faq.answer}
+                  {faq.a}
                 </AccordionContent>
               </AccordionItem>
             ))}

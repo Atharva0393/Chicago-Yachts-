@@ -1,6 +1,7 @@
 import React from "react";
-import { Calendar, MessageSquare, PhoneCall, Search } from "lucide-react";
+import { Calendar, MessageSquare, PhoneCall, Search, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
+import { companyInfo } from "@/data/company";
 
 const options = [
   {
@@ -20,11 +21,11 @@ const options = [
     primary: false
   },
   {
-    icon: <PhoneCall className="w-5 h-5" />,
+    icon: <Phone className="w-5 h-5" />,
     title: "Call Concierge",
     desc: "Speak directly with our booking specialists.",
-    btnText: "+1 (312) 555-0192",
-    href: "tel:+13125550192",
+    btnText: companyInfo.phone,
+    href: `tel:${companyInfo.phone.replace(/[^0-9+]/g, '')}`,
     primary: false
   },
   {
