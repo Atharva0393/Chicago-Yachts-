@@ -94,7 +94,8 @@ export class YachtRepository {
    */
   async getYachtBySlug(slug: string): Promise<Yacht | null> {
     try {
-      let yacht = await db.yacht.findUnique({
+      // Use findFirst instead of findUnique because the live DB might be missing the UNIQUE constraint on slug
+      let yacht = await db.yacht.findFirst({
         where: { slug },
         include: {
           images: true,
