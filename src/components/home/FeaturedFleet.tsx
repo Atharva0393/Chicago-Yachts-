@@ -7,6 +7,7 @@ export async function FeaturedFleet() {
   const yachts = [...allYachts].map(y => ({
     id: y.id,
     name: y.name,
+    slug: y.slug,
     capacity: y.capacity,
     length: `${y.length} ft`,
     price: `$${y.pricePerHour * 4}`,
@@ -31,38 +32,40 @@ export async function FeaturedFleet() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {yachts.map((yacht) => (
-            <div key={yacht.id} className="bg-card rounded-2xl overflow-hidden border border-border/40 shadow-sm hover:shadow-xl hover-lift flex flex-col group cursor-pointer transition-luxury">
-              <div className="relative h-72 w-full overflow-hidden">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-105"
-                  style={{ backgroundImage: `url('${yacht.image}')` }}
-                />
+            <Link href={`/fleet/${yacht.slug}`} key={yacht.id}>
+              <div className="bg-card rounded-2xl overflow-hidden border border-border/40 shadow-sm hover:shadow-xl hover-lift flex flex-col group cursor-pointer transition-luxury h-full">
+                <div className="relative h-72 w-full overflow-hidden">
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-105"
+                    style={{ backgroundImage: `url('${yacht.image}')` }}
+                  />
+                </div>
+                <div className="p-8 flex flex-col flex-1">
+                  <div className="flex justify-between items-start mb-6">
+                    <h4 className="text-2xl font-medium tracking-tight">{yacht.name}</h4>
+                  </div>
+                  <div className="flex gap-6 mb-8 text-sm text-muted-foreground font-medium border-b border-border/40 pb-6">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>{yacht.capacity} Guests</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Ruler className="h-4 w-4" />
+                      <span>{yacht.length}</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Starting at</span>
+                      <span className="text-xl font-medium text-foreground">{yacht.price} <span className="text-sm text-muted-foreground font-normal">/ 4hrs</span></span>
+                    </div>
+                    <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-luxury">
+                      <Anchor className="h-4 w-4" />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="p-8 flex flex-col flex-1">
-                <div className="flex justify-between items-start mb-6">
-                  <h4 className="text-2xl font-medium tracking-tight">{yacht.name}</h4>
-                </div>
-                <div className="flex gap-6 mb-8 text-sm text-muted-foreground font-medium border-b border-border/40 pb-6">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>{yacht.capacity} Guests</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Ruler className="h-4 w-4" />
-                    <span>{yacht.length}</span>
-                  </div>
-                </div>
-                <div className="mt-auto flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">Starting at</span>
-                    <span className="text-xl font-medium text-foreground">{yacht.price} <span className="text-sm text-muted-foreground font-normal">/ 4hrs</span></span>
-                  </div>
-                  <div className="h-10 w-10 rounded-full border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-luxury">
-                    <Anchor className="h-4 w-4" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
