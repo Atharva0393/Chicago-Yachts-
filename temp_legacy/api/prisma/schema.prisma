@@ -1,0 +1,256 @@
+// BookLuxuryYacht API — Prisma schema
+//
+// Local dev uses SQLite (zero external setup — just `npx prisma migrate dev`).
+// Production uses PostgreSQL (see docs/DEPLOYMENT.md) — only swap `provider`/`url`
+// below and re-run migrations; every field type here is deliberately chosen to be
+// portable across both (no native Postgres enums/arrays, so nothing else changes).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users & roles
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  name         String
+  role         String   @default("customer") // customer | owner | admin | manager | support
+  status       String   @default("active") // active | suspended | flagged
+  locale       String   @default("en")
+  currency     String   @default("USD")
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownerProfile   OwnerProfile?
+  yachts         Yacht[]         @relation("YachtOwner")
+  bookings       Booking[]       @relation("CustomerBookings")
+  reviews        Review[]        @relation("ReviewAuthor")
+  supportTickets SupportTicket[] @relation("TicketRequester")
+  assignedTickets SupportTicket[] @relation("TicketAssignee")
+  auditLogs      AuditLog[]
+  messages       Message[]
+}
+
+model OwnerProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company            String?
+  stripeAccountId    String?
+  verificationStatus String   @default("pending") // pending | verified | rejected
+  insuranceDocUrl    String?
+  registrationDocUrl String?
+  createdAt          DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Destinations & fleet
+// ---------------------------------------------------------------------------
+
+model Destination {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  country     String
+  tagline     String
+  description String
+  heroImage   String
+  currency    String
+  timezone    String   @default("UTC")
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  yachts Yacht[]
+}
+
+model Yacht {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  ownerId       String
+  owner         User     @relation("YachtOwner", fields: [ownerId], references: [id])
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  title         String
+  type          String // Motor Yacht | Mega Yacht | Sailing Yacht | Catamaran | Speedboat | Houseboat
+  marina        String
+  lengthFt      Int
+  capacity      Int
+  cabins        Int      @default(0)
+  crew          Int      @default(0)
+  withCaptain   Boolean  @default(true)
+  instantBook   Boolean  @default(false)
+  description   String
+  pricePerHour  Float
+  minHours      Int      @default(2)
+  currency      String
+  status        String   @default("draft") // draft | pending | live | rejected | paused
+  rating        Float    @default(0)
+  reviewCount   Int      @default(0)
+  bookingsCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  media         YachtMedia[]
+  amenities     YachtAmenity[]
+  packages      Package[]
+  availability  Availability[]
+  bookings      Booking[]
+  reviews       Review[]
+}
+
+model YachtMedia {
+  id        String   @id @default(cuid())
+  yachtId   String
+  yacht     Yacht    @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+  kind      String   @default("photo") // photo | video
+  url       String
+  sortOrder Int      @default(0)
+}
+
+model Amenity {
+  id    String @id @default(cuid())
+  name  String @unique
+
+  yachts YachtAmenity[]
+}
+
+model YachtAmenity {
+  yachtId   String
+  yacht     Yacht   @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+  amenityId String
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([yachtId, amenityId])
+}
+
+model Package {
+  id       String @id @default(cuid())
+  yachtId  String
+  yacht    Yacht  @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+  name     String
+  hours    Int
+  price    Float
+  includes String // JSON-encoded string[] — kept simple for SQLite/Postgres portability
+}
+
+model Availability {
+  id      String   @id @default(cuid())
+  yachtId String
+  yacht   Yacht    @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+  date    DateTime
+  blocked Boolean  @default(false)
+  note    String?
+
+  @@unique([yachtId, date])
+}
+
+// ---------------------------------------------------------------------------
+// Bookings, payments, reviews
+// ---------------------------------------------------------------------------
+
+model Booking {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  yachtId         String
+  yacht           Yacht     @relation(fields: [yachtId], references: [id])
+  customerId      String
+  customer        User      @relation("CustomerBookings", fields: [customerId], references: [id])
+  packageId       String?
+  date            DateTime
+  startTime       String // "HH:mm"
+  hours           Int
+  guests          Int
+  status          String    @default("pending") // pending|approved|paid|confirmed|completed|cancelled|refunded|disputed
+  subtotal        Float
+  fees            Float
+  taxes           Float     @default(0)
+  total           Float
+  currency        String
+  paymentIntentId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  payments Payment[]
+  review   Review?
+  tickets  SupportTicket[]
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  kind      String // charge | refund | payout
+  stripeId  String?
+  amount    Float
+  status    String // pending | succeeded | failed
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  bookingId      String   @unique
+  booking        Booking  @relation(fields: [bookingId], references: [id])
+  authorId       String
+  author         User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  yachtId        String
+  yacht          Yacht    @relation(fields: [yachtId], references: [id])
+  ratingOverall  Float
+  ratingAccuracy Float?
+  ratingValue    Float?
+  ratingComms    Float?
+  comment        String
+  ownerReply     String?
+  status         String   @default("published") // published | flagged | removed
+  createdAt      DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Messaging & support
+// ---------------------------------------------------------------------------
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model SupportTicket {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation("TicketRequester", fields: [userId], references: [id])
+  bookingId  String?
+  booking    Booking? @relation(fields: [bookingId], references: [id])
+  assigneeId String?
+  assignee   User?    @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  subject    String
+  priority   String   @default("medium") // low | medium | high
+  status     String   @default("open") // open | in_progress | escalated | resolved
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  actorId  String
+  actor    User     @relation(fields: [actorId], references: [id])
+  action   String
+  entity   String
+  entityId String
+  diff     String? // JSON-encoded
+  at       DateTime @default(now())
+}

@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --navy-950: #06101f;
+  --navy-900: #0a1628;
+  --navy-800: #10233f;
+  --navy-700: #1a3358;
+  --gold-300: #e6c968;
+  --gold-400: #d4af37;
+  --gold-500: #c9a227;
+  --gold-600: #a8871e;
+  --ivory-50: #faf9f6;
+  --ivory-100: #f5f2ea;
+  --ivory-200: #ece7d9;
+  --sea-400: #2dd4bf;
+  --sea-500: #14b8a6;
+}
+
+@theme inline {
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-ivory-50: var(--ivory-50);
+  --color-ivory-100: var(--ivory-100);
+  --color-ivory-200: var(--ivory-200);
+  --color-sea-400: var(--sea-400);
+  --color-sea-500: var(--sea-500);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-playfair), ui-serif, Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ivory-50);
+  color: var(--navy-900);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-playfair), ui-serif, Georgia, serif;
+}
+
+/* thin gold divider used under section headings */
+.gold-rule {
+  width: 64px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-400), transparent);
+}
+
+/* subtle grain/vignette over hero media */
+.hero-overlay {
+  background:
+    linear-gradient(to bottom, rgba(6, 16, 31, 0.55) 0%, rgba(6, 16, 31, 0.25) 40%, rgba(6, 16, 31, 0.75) 100%);
+}
+
+/* shimmering gold text for headline accents */
+.text-gold-shimmer {
+  background: linear-gradient(100deg, #c9a227 20%, #f3e3a0 50%, #c9a227 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* slow drift for hero background image */
+@keyframes kenburns {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    transform: scale(1.12) translateY(-2%);
+  }
+}
+
+.animate-kenburns {
+  animation: kenburns 24s ease-in-out infinite alternate;
+}
+
+/* card hover lift */
+.card-lift {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -16px rgba(10, 22, 40, 0.28);
+}
+
+::selection {
+  background: var(--gold-400);
+  color: var(--navy-950);
+}
+
+/* hide scrollbar on horizontal carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
