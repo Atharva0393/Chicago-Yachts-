@@ -90,11 +90,11 @@ export class YachtRepository {
   }
 
   /**
-   * Retrieves a single yacht by its unique slug.
+   * Retrieves a single yacht by its slug (or ID as fallback if a UUID is passed).
    */
   async getYachtBySlug(slug: string): Promise<Yacht | null> {
     try {
-      const yacht = await db.yacht.findUnique({
+      let yacht = await db.yacht.findUnique({
         where: { slug },
         include: {
           images: true,
@@ -106,6 +106,22 @@ export class YachtRepository {
           pricingRules: true,
         },
       });
+
+      // Fallback: If not found by slug, and the slug looks like a UUID, try finding by ID
+      if (!yacht && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) {
+        yacht = await db.yacht.findUnique({
+          where: { id: slug },
+          include: {
+            images: true,
+            amenities: {
+              include: {
+                amenity: true,
+              },
+            },
+            pricingRules: true,
+          },
+        });
+      }
 
       if (!yacht) return null;
       return mapPrismaYachtToPublicModel(yacht);
