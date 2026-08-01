@@ -114,7 +114,7 @@ export default function ComparePage() {
           {/* Accommodations */}
           <div className="mt-16">
             <h4 className="text-xl font-medium tracking-tight mb-4 sticky left-0">Accommodations</h4>
-            {renderRow("Crew Included", y => y.crewIncluded ? <Check className="h-5 w-5 text-foreground" /> : <Minus className="h-5 w-5 text-muted-foreground" />)}
+            {renderRow("Crew Included", y => y.amenities.includes("Captain Included") ? <Check className="h-5 w-5 text-foreground" /> : <Minus className="h-5 w-5 text-muted-foreground" />)}
             {renderRow("Cabins", "cabins")}
             {renderRow("Bathrooms", "bathrooms")}
           </div>
