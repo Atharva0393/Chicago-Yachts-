@@ -6,6 +6,10 @@ import { headers } from "next/headers";
 
 export async function createStripeCheckoutAction(holdToken: string) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === "sk_test_placeholder") {
+      return { status: "CONFIGURATION_REQUIRED", message: "Secure online payment is temporarily unavailable." };
+    }
+
     // 1. Fetch Authoritative Snapshot
     const hold = await db.bookingHold.findUnique({
       where: { id: holdToken },

@@ -149,6 +149,8 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
           addonsTotal
         });
 
+        if (!isCurrent) return;
+
         setQuoteStatus(res.status);
         if (res.status === "SUCCESS" && res.quote) {
           setQuote(res.quote);
@@ -156,17 +158,22 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
           setQuote(null);
         }
       } catch (err) {
+        if (!isCurrent) return;
         console.error("Failed to fetch quote from server action:", err);
         setQuoteStatus("PRICING_NOT_CONFIGURED"); // Fallback to allow UI to recover
         setQuote(null);
       }
     };
 
+    let isCurrent = true;
     const timerId = setTimeout(() => {
-      fetchQuote();
+      if (isCurrent) fetchQuote();
     }, 300); // Small debounce
 
-    return () => clearTimeout(timerId);
+    return () => {
+      isCurrent = false;
+      clearTimeout(timerId);
+    };
   }, [yachtId, selectedDate, timeSlot, duration, guests, selectedAddons]);
 
   const submitBooking = async () => {

@@ -239,6 +239,9 @@ export function BookingWizard({ yacht }: { yacht: any }) {
       } else if (res.status === "EXPIRED") {
         setStripeError("Your reservation hold has expired. Please start over.");
         setIsRedirectingToStripe(false);
+      } else if (res.status === "CONFIGURATION_REQUIRED") {
+        setStripeError(res.message || "Secure online payment is temporarily unavailable.");
+        setIsRedirectingToStripe(false);
       } else {
         setStripeError(res.message || "Failed to initialize payment. Please try again.");
         setIsRedirectingToStripe(false);
