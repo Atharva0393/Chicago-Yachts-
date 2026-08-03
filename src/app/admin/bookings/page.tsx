@@ -14,6 +14,7 @@ export default async function BookingsPage() {
     timeSlot: "CUSTOM",
     guests: b.guestCount,
     totalAmount: Number(b.totalAmount),
+    remainingAmount: Number(b.remainingAmount),
     status: b.bookingStatus as any,
     paymentStatus: b.paymentStatus,
     createdAt: b.createdAt.toISOString()

@@ -112,6 +112,8 @@ export interface Booking {
   duration: number;
   guests: number;
   totalPrice: number;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+  status: "PENDING" | "CONFIRMED" | "IN_PROGRESS" | "CANCELLED" | "COMPLETED";
+  paymentStatus?: string;
+  remainingAmount?: number;
   createdAt: string;
 }

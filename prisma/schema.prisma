@@ -41,6 +41,14 @@ enum PaymentType {
   REFUND
 }
 
+enum PaymentMethod {
+  STRIPE
+  CASH
+  BANK_TRANSFER
+  ZELLE
+  OTHER
+}
+
 enum LeadStatus {
   NEW
   CONTACTED
@@ -94,6 +102,8 @@ enum ActivityType {
   NOTE_ADDED
   WHATSAPP_MESSAGE
   EMAIL_SENT
+  STATUS_CHANGED
+  BOOKING_COMPLETED
 }
 
 enum ConversationChannel {
@@ -262,8 +272,8 @@ model TimeSlot {
 }
 
 model BookingHold {
-  id          String @id @default(uuid())
-  customerRef String // Session ID or Customer ID to identify who holds it
+  id             String @id @default(uuid())
+  customerRef    String // Session ID or Customer ID to identify who holds it
   idempotencyKey String @unique // To prevent duplicate holds
 
   startDateTime DateTime @db.Timestamptz
@@ -277,7 +287,7 @@ model BookingHold {
   totalAmount       Decimal? @db.Decimal(10, 2)
   depositAmount     Decimal? @db.Decimal(10, 2) // 30% of totalAmount — CONFIRMED Chicago Yachts deposit policy
   remainingBalance  Decimal? @db.Decimal(10, 2) // 70% of totalAmount — due on charter date
-  depositPercentage Decimal? @db.Decimal(5, 2)  // Policy snapshot (30.00) — preserved for historical accuracy
+  depositPercentage Decimal? @db.Decimal(5, 2) // Policy snapshot (30.00) — preserved for historical accuracy
   pricingRuleId     String?
 
   yachtId String
@@ -293,7 +303,7 @@ model BookingHold {
   guestCount        Int?
   customerNotes     String? @db.Text
 
-  stripeSessionId   String? @unique
+  stripeSessionId String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -401,9 +411,16 @@ model PaymentTransaction {
   stripeRefundId        String? @unique
 
   type     PaymentType
+  method   PaymentMethod @default(STRIPE)
   amount   Decimal       @db.Decimal(10, 2)
   currency String        @default("USD")
   status   PaymentStatus @default(PENDING)
+
+  reference String?
+  notes     String? @db.Text
+
+  recordedById String?
+  recordedBy   AdminUser? @relation(fields: [recordedById], references: [id], onDelete: SetNull)
 
   bookingId String
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
@@ -515,6 +532,8 @@ model AdminUser {
   role         String    @default("ADMIN") // e.g., SUPER_ADMIN, ADMIN, MANAGER
   isActive     Boolean   @default(true)
   lastLoginAt  DateTime?
+
+  recordedTransactions PaymentTransaction[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

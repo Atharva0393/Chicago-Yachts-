@@ -14,6 +14,7 @@ import {
   MessageSquare
 } from "lucide-react"
 import Image from "next/image"
+import { toZonedTime, format } from "date-fns-tz"
 
 export default async function AdminDashboard() {
   const yachts = await db.yacht.findMany();
@@ -21,11 +22,16 @@ export default async function AdminDashboard() {
   
   // Calculate dynamic metrics
   const totalRevenue = bookings.reduce((sum: number, b: any) => sum + (b.bookingStatus !== "CANCELLED" ? Number(b.totalAmount) : 0), 0);
-  const pendingPayments = bookings.reduce((sum: number, b: any) => sum + (b.paymentStatus === "PENDING" ? Number(b.totalAmount) : 0), 0);
+  const outstandingReceivables = bookings.reduce((sum: number, b: any) => sum + (b.bookingStatus !== "CANCELLED" && b.paymentStatus !== "PAID" ? Number(b.remainingAmount || 0) : 0), 0);
   
-  const today = new Date();
+  const TIMEZONE = "America/Chicago";
+  const todayZoned = toZonedTime(new Date(), TIMEZONE);
+  const todayZonedString = format(todayZoned, 'yyyy-MM-dd', { timeZone: TIMEZONE });
+  
   const todaysBookings = bookings.filter((b: any) => {
-    return b.startDateTime.getDate() === today.getDate() && b.startDateTime.getMonth() === today.getMonth() && b.startDateTime.getFullYear() === today.getFullYear();
+    if (b.bookingStatus === "CANCELLED") return false;
+    const bookingZoned = toZonedTime(b.startDateTime, TIMEZONE);
+    return format(bookingZoned, 'yyyy-MM-dd', { timeZone: TIMEZONE }) === todayZonedString;
   }).length;
   
   const activeYachts = yachts.filter((y: any) => y.isActive).length;
@@ -128,8 +134,8 @@ export default async function AdminDashboard() {
             </span>
           </div>
           <div>
-            <div className="text-sm text-slate-500 font-medium mb-1">Pending Payments</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">${pendingPayments.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+            <div className="text-sm text-slate-500 font-medium mb-1">Outstanding Receivables</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">${outstandingReceivables.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
           </div>
         </div>
 

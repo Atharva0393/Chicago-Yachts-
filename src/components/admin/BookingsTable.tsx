@@ -7,6 +7,8 @@ import { CheckCircle2, XCircle, Clock, Calendar, Search, Filter, Eye } from "luc
 import { SlideOver } from "@/components/ui/slide-over"
 import { BookingDetails } from "@/components/admin/BookingDetails"
 import { Input } from "@/components/ui/input"
+import { toZonedTime, format } from "date-fns-tz"
+import { isBefore, startOfDay } from "date-fns"
 
 export function BookingsTable({ initialBookings }: { initialBookings: Booking[] }) {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings)
@@ -49,15 +51,44 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
   const filteredBookings = useMemo(() => {
     return bookings.filter(booking => {
       // 1. Status Filter
-      if (statusFilter !== "ALL" && booking.status !== statusFilter) return false
-      
+      if (statusFilter !== "ALL") {
+        if (statusFilter === "PENDING" && booking.status !== "PENDING") return false;
+        if (statusFilter === "CONFIRMED" && booking.status !== "CONFIRMED") return false;
+        if (statusFilter === "COMPLETED" && booking.status !== "COMPLETED") return false;
+        if (statusFilter === "CANCELLED" && booking.status !== "CANCELLED") return false;
+
+        // Financial Filters
+        if (statusFilter === "PAID" && booking.paymentStatus !== "PAID") return false;
+        
+        if (statusFilter === "ALL_OUTSTANDING" && (booking.paymentStatus === "PAID" || (booking as any).remainingAmount <= 0)) return false;
+
+        const isOutstanding = booking.paymentStatus !== "PAID" && (booking as any).remainingAmount > 0;
+        
+        if (statusFilter === "DUE_TODAY" || statusFilter === "UPCOMING" || statusFilter === "OVERDUE") {
+          if (!isOutstanding) return false;
+          
+          const TIMEZONE = "America/Chicago";
+          const dueZoned = toZonedTime(new Date(booking.date), TIMEZONE);
+          const nowZoned = toZonedTime(new Date(), TIMEZONE);
+          const todayString = format(nowZoned, 'yyyy-MM-dd', { timeZone: TIMEZONE });
+          const dueString = format(dueZoned, 'yyyy-MM-dd', { timeZone: TIMEZONE });
+          
+          const isToday = dueString === todayString;
+          const isOverdue = isBefore(dueZoned, startOfDay(nowZoned)); // Past days
+
+          if (statusFilter === "DUE_TODAY" && !isToday) return false;
+          if (statusFilter === "OVERDUE" && (isToday || !isOverdue)) return false;
+          if (statusFilter === "UPCOMING" && (isToday || isOverdue)) return false;
+        }
+      }
+
       // 2. Search Filter (ID, Customer Name, Customer Email)
       if (searchQuery.trim() !== "") {
-        const query = searchQuery.toLowerCase()
-        const matchesId = booking.id.toLowerCase().includes(query)
-        const matchesName = booking.customer?.name.toLowerCase().includes(query)
-        const matchesEmail = booking.customer?.email.toLowerCase().includes(query)
-        if (!matchesId && !matchesName && !matchesEmail) return false
+        const query = searchQuery.toLowerCase();
+        const matchesId = booking.id.toLowerCase().includes(query);
+        const matchesName = booking.customer?.name.toLowerCase().includes(query);
+        const matchesEmail = booking.customer?.email.toLowerCase().includes(query);
+        if (!matchesId && !matchesName && !matchesEmail) return false;
       }
       
       return true
@@ -108,6 +139,11 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
               <option value="CONFIRMED">Confirmed</option>
               <option value="COMPLETED">Completed</option>
               <option value="CANCELLED">Cancelled</option>
+              <option value="ALL_OUTSTANDING">All Outstanding</option>
+              <option value="DUE_TODAY">Due Today</option>
+              <option value="UPCOMING">Upcoming</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="PAID">Paid</option>
             </select>
           </div>
         </div>
@@ -160,7 +196,16 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
                     ${booking.totalPrice.toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
-                    {getStatusBadge(booking.status)}
+                    <div className="flex flex-col gap-1.5">
+                      {getStatusBadge(booking.status)}
+                      {booking.paymentStatus === "PAID" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200 w-fit">PAID IN FULL</span>
+                      ) : booking.paymentStatus === "PARTIAL" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-200 w-fit">PARTIAL / BALANCE DUE</span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200 w-fit">{booking.paymentStatus}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button 
