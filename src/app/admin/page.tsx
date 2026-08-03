@@ -228,7 +228,7 @@ export default async function AdminDashboard() {
             ) : popularYachts.map((yacht: any, i: number) => (
               <div key={yacht.id} className="flex items-center gap-4">
                 <div className="relative h-12 w-16 rounded-lg overflow-hidden shrink-0">
-                  <Image src={yacht.images[0] || '/images/placeholder.jpg'} alt={yacht.name} fill className="object-cover" />
+                  <Image src={yacht.images?.[0] || '/images/placeholder.jpg'} alt={yacht.name} fill className="object-cover" />
                 </div>
                 <div className="flex flex-col flex-1">
                   <span className="text-sm font-semibold text-slate-900 line-clamp-1">{yacht.name}</span>

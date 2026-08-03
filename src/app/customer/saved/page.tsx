@@ -53,7 +53,7 @@ export default function WishlistPage() {
             key={yacht.id}
             id={yacht.id}
             name={yacht.name}
-            image={yacht.images[0]}
+            image={yacht.images?.[0]}
             price={yacht.pricePerHour}
             capacity={yacht.capacity}
             length={`${yacht.length} ft`}

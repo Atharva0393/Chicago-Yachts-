@@ -123,7 +123,7 @@ export function FleetTable({ initialYachts }: { initialYachts: Yacht[] }) {
                     <div className="flex items-center gap-3">
                       <div className="relative h-10 w-14 rounded overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                         {yacht.images && yacht.images.length > 0 ? (
-                          <Image src={yacht.images[0]} alt={yacht.name} fill className="object-cover" />
+                          <Image src={yacht.images?.[0]} alt={yacht.name} fill className="object-cover" />
                         ) : (
                           <Anchor className="h-4 w-4 text-slate-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                         )}

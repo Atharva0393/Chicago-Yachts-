@@ -63,7 +63,7 @@ export default async function CustomerDashboardOverview() {
             {/* Image Section */}
             <div className="w-full md:w-[40%] relative aspect-video md:aspect-auto overflow-hidden">
               <Image 
-                src={nextTrip.images[0]?.url || '/placeholder.jpg'} 
+                src={nextTrip.images?.[0]?.url || '/placeholder.jpg'} 
                 alt={nextTrip.name} 
                 fill 
                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-105" 

@@ -106,7 +106,7 @@ export function BookingDetails({ booking, onUpdateStatus, isLoading }: BookingDe
           <div className="flex items-center gap-4 mb-6 p-3 bg-slate-50 rounded-xl border border-slate-100">
             <div className="relative h-16 w-24 rounded-lg overflow-hidden bg-slate-200 shrink-0">
               {booking.yacht?.images?.[0] && (
-                <Image src={booking.yacht.images[0]} alt={booking.yacht.name} fill className="object-cover" />
+                <Image src={booking.yacht.images?.[0]} alt={booking.yacht.name} fill className="object-cover" />
               )}
             </div>
             <div className="flex flex-col">

@@ -81,7 +81,7 @@ export default function ComparePage() {
                     <X className="h-3 w-3" />
                   </button>
                   <div className="relative w-full aspect-[4/3] mb-6 rounded-2xl overflow-hidden shadow-sm">
-                    <Image src={yacht.images[0]} alt={yacht.name} fill className="object-cover" />
+                    <Image src={yacht.images?.[0]} alt={yacht.name} fill className="object-cover" />
                   </div>
                   <h3 className="text-xl md:text-2xl font-semibold tracking-tight mb-2">{yacht.name}</h3>
                   <p className="text-lg text-muted-foreground mb-6 font-medium">${yacht.pricePerHour}<span className="text-sm">/hr</span></p>
