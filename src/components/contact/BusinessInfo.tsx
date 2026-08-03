@@ -1,8 +1,7 @@
 import React from "react";
-import { dataService } from "@/services/data.service";
+import { companyInfo } from "@/lib/constants/company";
 
-export async function BusinessInfo() {
-  const companyInfo = await dataService.getCompanyInfo();
+export function BusinessInfo() {
   return (
     <div className="bg-slate-900 rounded-[2rem] p-8 md:p-12 text-white relative overflow-hidden h-full">
       {/* Decorative gradients */}

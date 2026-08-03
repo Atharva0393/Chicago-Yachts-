@@ -5,17 +5,19 @@ import { Customer, Booking } from "@/types"
 import { CustomerProfile } from "./CustomerProfile"
 import { Search, Filter, MoreHorizontal, Mail, Phone, Calendar } from "lucide-react"
 import { updateCustomerStatus } from "@/actions/crm"
+import { LeadStatus } from "@prisma/client"
 
 interface KanbanBoardProps {
   customers: Customer[]
   bookings: Booking[]
 }
 
-const COLUMNS: { id: Customer["status"]; label: string; color: string }[] = [
-  { id: "LEAD", label: "Lead", color: "bg-blue-500" },
+const COLUMNS: { id: LeadStatus; label: string; color: string }[] = [
+  { id: "NEW", label: "New Lead", color: "bg-blue-500" },
   { id: "CONTACTED", label: "Contacted", color: "bg-purple-500" },
   { id: "QUALIFIED", label: "Qualified", color: "bg-orange-500" },
-  { id: "CONVERTED", label: "Converted", color: "bg-emerald-500" },
+  { id: "BOOKING_IN_PROGRESS", label: "In Progress", color: "bg-emerald-400" },
+  { id: "WON", label: "Won", color: "bg-emerald-600" },
   { id: "LOST", label: "Lost", color: "bg-red-500" },
 ]
 
@@ -37,7 +39,7 @@ export function KanbanBoard({ customers, bookings }: KanbanBoardProps) {
     e.preventDefault()
   }
 
-  const handleDrop = async (e: React.DragEvent, status: Customer["status"]) => {
+  const handleDrop = async (e: React.DragEvent, status: LeadStatus) => {
     e.preventDefault()
     const customerId = e.dataTransfer.getData("customerId")
     if (customerId && status) {
@@ -79,7 +81,7 @@ export function KanbanBoard({ customers, bookings }: KanbanBoardProps) {
         <div className="flex gap-6 h-full min-w-max pb-4">
           
           {COLUMNS.map(col => {
-            const colCustomers = filteredCustomers.filter(c => (c.status || "LEAD") === col.id)
+            const colCustomers = filteredCustomers.filter(c => ((c as any).leadStatus || "NEW") === col.id)
             
             return (
               <div 

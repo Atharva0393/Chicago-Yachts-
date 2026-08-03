@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run db:deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -13,7 +13,7 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
     "db:validate": "prisma validate",
-    "postinstall": "prisma generate && prisma db push --accept-data-loss"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

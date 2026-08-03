@@ -1,12 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { dataService } from "@/services/data.service"
-import { Booking } from "@/types"
+import { bookingRepository } from "@/server/repositories/booking.repository"
+import { BookingStatus } from "@prisma/client"
+import { requireAdmin } from "@/lib/auth-server"
 
-export async function updateBookingStatus(id: string, status: Booking["status"]) {
+export async function updateBookingStatus(id: string, status: BookingStatus) {
   try {
-    const booking = await dataService.updateBookingStatus(id, status)
+    await requireAdmin();
+    const booking = await bookingRepository.updateBookingStatus(id, status)
     revalidatePath("/admin/bookings")
     revalidatePath("/admin") // For dashboard metrics
     return { success: true, booking }

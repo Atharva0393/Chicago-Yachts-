@@ -1,18 +1,23 @@
-import { dataService } from "@/services/data.service";
+import { db } from "@/lib/db";
 import { RecentlyViewedCarousel } from "@/components/shared/RecentlyViewedCarousel";
 import { Anchor, CalendarDays, MapPin, MessageSquare, ArrowRight, Download } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default async function CustomerDashboardOverview() {
-  const yachts = await dataService.getYachts();
-  // Mock Data
-  const nextTrip = yachts[0]; // Assuming The Azimut 60 is the next booked trip
+  const nextTrip = await db.yacht.findFirst({
+    include: { images: true }
+  }); // Mock next trip
+
   const stats = [
     { label: "Total Charters", value: "3", icon: Anchor },
     { label: "Upcoming Trips", value: "1", icon: CalendarDays },
     { label: "Unread Messages", value: "2", icon: MessageSquare },
   ];
+
+  if (!nextTrip) {
+    return <div className="p-8 text-center text-muted-foreground">No upcoming trips. Start browsing our fleet!</div>;
+  }
 
   return (
     <div className="flex flex-col gap-10 animate-in fade-in duration-500">
@@ -58,7 +63,7 @@ export default async function CustomerDashboardOverview() {
             {/* Image Section */}
             <div className="w-full md:w-[40%] relative aspect-video md:aspect-auto overflow-hidden">
               <Image 
-                src={nextTrip.images[0]} 
+                src={nextTrip.images[0]?.url || '/placeholder.jpg'} 
                 alt={nextTrip.name} 
                 fill 
                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-105" 

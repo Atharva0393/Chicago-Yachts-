@@ -1,12 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { dataService } from "@/services/data.service"
-import { Customer } from "@/types"
+import { customerRepository } from "@/server/repositories/customer.repository"
+import { LeadStatus } from "@prisma/client"
+import { requireAdmin } from "@/lib/auth-server"
 
-export async function updateCustomerStatus(id: string, status: Customer["status"]) {
+export async function updateCustomerStatus(id: string, status: LeadStatus) {
   try {
-    const customer = await dataService.updateCustomerStatus(id, status)
+    await requireAdmin();
+    const customer = await customerRepository.updateLeadStatus(id, status)
     if (!customer) {
       return { success: false, error: "Customer not found" }
     }
@@ -20,27 +22,29 @@ export async function updateCustomerStatus(id: string, status: Customer["status"
 
 export async function addCustomerNote(id: string, content: string) {
   try {
-    const customer = await dataService.addCustomerNote(id, content, "Admin")
-    if (!customer) {
+    await requireAdmin();
+    const note = await customerRepository.addNote(id, content, "Admin")
+    if (!note) {
       return { success: false, error: "Customer not found" }
     }
     revalidatePath("/admin/crm")
     revalidatePath("/admin/customers")
-    return { success: true, customer }
+    return { success: true, note }
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to add note" }
   }
 }
 
-export async function addCustomerActivity(id: string, type: any, description: string) {
+export async function addCustomerActivity(customerId: string, type: import("@prisma/client").ActivityType, description: string) {
   try {
-    const customer = await dataService.addCustomerActivity(id, type, description)
-    if (!customer) {
+    await requireAdmin();
+    const activity = await customerRepository.addActivity(customerId, type, description)
+    if (!activity) {
       return { success: false, error: "Customer not found" }
     }
     revalidatePath("/admin/crm")
     revalidatePath("/admin/customers")
-    return { success: true, customer }
+    return { success: true, activity }
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to add activity" }
   }

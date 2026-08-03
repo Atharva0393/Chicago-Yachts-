@@ -124,8 +124,8 @@ export function EnquiryForm() {
           </label>
         </div>
 
-        <Button type="submit" className="w-full rounded-xl h-14 bg-slate-900 text-white hover:bg-slate-800 text-base font-medium transition-luxury shadow-lg shadow-slate-900/20">
-          Send Enquiry
+        <Button type="button" disabled className="w-full rounded-xl h-14 bg-slate-200 text-slate-500 text-base font-medium transition-luxury cursor-not-allowed">
+          Email Integration Pending
         </Button>
       </form>
     </div>

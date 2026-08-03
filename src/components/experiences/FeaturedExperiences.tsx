@@ -3,9 +3,9 @@ import Image from "next/image";
 import { ArrowRight, Users, Clock } from "lucide-react";
 import Link from "next/link";
 
-import { dataService } from "@/services/data.service";
-export async function FeaturedExperiences() {
-  const experiences = await dataService.getExperiences();
+import { experiences } from "@/lib/constants/experiences";
+
+export function FeaturedExperiences() {
   return (
     <section className="py-24 bg-background">
       <div className="container px-4 md:px-8 max-w-7xl mx-auto">

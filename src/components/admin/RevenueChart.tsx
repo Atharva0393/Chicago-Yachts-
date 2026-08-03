@@ -10,22 +10,22 @@ import {
   ResponsiveContainer
 } from "recharts"
 
-const mockData = [
-  { name: "Aug 1", revenue: 4000 },
-  { name: "Aug 5", revenue: 3000 },
-  { name: "Aug 10", revenue: 6000 },
-  { name: "Aug 15", revenue: 4500 },
-  { name: "Aug 20", revenue: 7000 },
-  { name: "Aug 25", revenue: 5500 },
-  { name: "Aug 30", revenue: 9000 },
-]
 
-export function RevenueChart() {
+
+export function RevenueChart({ data }: { data: { name: string, revenue: number }[] }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl">
+        <span className="text-slate-400 text-sm font-medium">No revenue data available</span>
+      </div>
+    )
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
-          data={mockData}
+          data={data}
           margin={{
             top: 5,
             right: 0,

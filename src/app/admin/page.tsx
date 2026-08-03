@@ -1,5 +1,5 @@
 import { RevenueChart } from "@/components/admin/RevenueChart"
-import { dataService } from "@/services/data.service"
+import { db } from "@/lib/db"
 import { 
   DollarSign, 
   CalendarDays, 
@@ -16,19 +16,56 @@ import {
 import Image from "next/image"
 
 export default async function AdminDashboard() {
-  const yachts = await dataService.getYachts();
-  const bookings = await dataService.getBookings();
+  const yachts = await db.yacht.findMany();
+  const bookings = await db.booking.findMany();
   
   // Calculate dynamic metrics
-  const totalRevenue = bookings.reduce((sum, b) => sum + (b.status !== "CANCELLED" ? b.totalPrice : 0), 0);
-  const pendingPayments = bookings.reduce((sum, b) => sum + (b.status === "PENDING" ? b.totalPrice : 0), 0);
-  const todaysBookings = bookings.filter(b => {
-    const bDate = new Date(b.date);
-    const today = new Date();
-    return bDate.getDate() === today.getDate() && bDate.getMonth() === today.getMonth() && bDate.getFullYear() === today.getFullYear();
+  const totalRevenue = bookings.reduce((sum: number, b: any) => sum + (b.bookingStatus !== "CANCELLED" ? Number(b.totalAmount) : 0), 0);
+  const pendingPayments = bookings.reduce((sum: number, b: any) => sum + (b.paymentStatus === "PENDING" ? Number(b.totalAmount) : 0), 0);
+  
+  const today = new Date();
+  const todaysBookings = bookings.filter((b: any) => {
+    return b.startDateTime.getDate() === today.getDate() && b.startDateTime.getMonth() === today.getMonth() && b.startDateTime.getFullYear() === today.getFullYear();
   }).length;
-  const activeYachts = yachts.filter(y => y.availabilityStatus !== "Fully Booked").length;
-  const fleetAvailability = Math.round((activeYachts / yachts.length) * 100);
+  
+  const activeYachts = yachts.filter((y: any) => y.isActive).length;
+  const fleetAvailability = yachts.length > 0 ? Math.round((activeYachts / yachts.length) * 100) : 0;
+
+  const recentBookings = await db.booking.findMany({
+    take: 3,
+    orderBy: { createdAt: 'desc' },
+    include: { yacht: true }
+  });
+
+  // Fetch New Leads
+  const newLeads = await db.customer.findMany({
+    where: { leadStatus: 'NEW' },
+    orderBy: { createdAt: 'desc' },
+    take: 3
+  });
+
+  // Calculate Chart Data (Revenue by Date for the last 7 days as an example)
+  const chartData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const dayRevenue = bookings
+      .filter((b: any) => b.bookingStatus !== "CANCELLED" && b.createdAt.toDateString() === d.toDateString())
+      .reduce((sum: number, b: any) => sum + Number(b.totalAmount), 0);
+    chartData.push({ name: dateStr, revenue: dayRevenue });
+  }
+
+  // Calculate Popular Yachts
+  const yachtBookingsCount = bookings.reduce((acc: any, b: any) => {
+    acc[b.yachtId] = (acc[b.yachtId] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const popularYachts = yachts
+    .map((y: any) => ({ ...y, bookingCount: yachtBookingsCount[y.id] || 0 }))
+    .sort((a: any, b: any) => b.bookingCount - a.bookingCount)
+    .slice(0, 3);
 
   return (
     <div className="p-6 md:p-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto">
@@ -57,12 +94,12 @@ export default async function AdminDashboard() {
               <DollarSign className="h-5 w-5" />
             </div>
             <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
-              +14.5% <ArrowUpRight className="h-3 w-3" />
+              +0.0% <ArrowUpRight className="h-3 w-3" />
             </span>
           </div>
           <div>
             <div className="text-sm text-slate-500 font-medium mb-1">Total Revenue</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">${totalRevenue.toLocaleString()}</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
           </div>
         </div>
 
@@ -72,7 +109,7 @@ export default async function AdminDashboard() {
               <CalendarDays className="h-5 w-5" />
             </div>
             <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
-              +4 <ArrowUpRight className="h-3 w-3" />
+              +0 <ArrowUpRight className="h-3 w-3" />
             </span>
           </div>
           <div>
@@ -92,7 +129,7 @@ export default async function AdminDashboard() {
           </div>
           <div>
             <div className="text-sm text-slate-500 font-medium mb-1">Pending Payments</div>
-            <div className="text-3xl font-semibold tracking-tight text-slate-900">${pendingPayments.toLocaleString()}</div>
+            <div className="text-3xl font-semibold tracking-tight text-slate-900">${pendingPayments.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
           </div>
         </div>
 
@@ -127,7 +164,7 @@ export default async function AdminDashboard() {
             </select>
           </div>
           <div className="flex-1 min-h-[300px]">
-            <RevenueChart />
+            <RevenueChart data={chartData} />
           </div>
         </div>
 
@@ -157,18 +194,16 @@ export default async function AdminDashboard() {
               <button className="text-xs text-primary font-medium hover:underline">View All</button>
             </div>
             <div className="flex flex-col gap-4">
-              {[
-                { type: "booking", text: "New booking for Azimut 60", time: "10m ago" },
-                { type: "payment", text: "Payment received ($2,400)", time: "1h ago" },
-                { type: "lead", text: "New lead from contact form", time: "2h ago" },
-              ].map((activity, i) => (
-                <div key={i} className="flex gap-3 items-start">
+              {recentBookings.length === 0 ? (
+                <div className="text-sm text-slate-500 text-center py-4">No recent activity.</div>
+              ) : recentBookings.map((activity: any, i: number) => (
+                <div key={activity.id} className="flex gap-3 items-start">
                   <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                     <Activity className="h-4 w-4 text-slate-500" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-slate-700">{activity.text}</span>
-                    <span className="text-xs text-slate-400">{activity.time}</span>
+                    <span className="text-sm font-medium text-slate-700">New booking for {activity.yacht.name}</span>
+                    <span className="text-xs text-slate-400">{activity.createdAt.toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
@@ -188,17 +223,19 @@ export default async function AdminDashboard() {
             <button className="text-xs text-primary font-medium hover:underline">Full Fleet</button>
           </div>
           <div className="flex flex-col gap-4">
-            {yachts.slice(0, 3).map((yacht, i) => (
+            {popularYachts.length === 0 ? (
+              <div className="text-sm text-slate-500 text-center py-4">No yachts available.</div>
+            ) : popularYachts.map((yacht: any, i: number) => (
               <div key={yacht.id} className="flex items-center gap-4">
                 <div className="relative h-12 w-16 rounded-lg overflow-hidden shrink-0">
-                  <Image src={yacht.images[0]} alt={yacht.name} fill className="object-cover" />
+                  <Image src={yacht.images[0] || '/images/placeholder.jpg'} alt={yacht.name} fill className="object-cover" />
                 </div>
                 <div className="flex flex-col flex-1">
                   <span className="text-sm font-semibold text-slate-900 line-clamp-1">{yacht.name}</span>
-                  <span className="text-xs text-slate-500">{12 - i * 3} bookings this month</span>
+                  <span className="text-xs text-slate-500">{yacht.bookingCount} bookings</span>
                 </div>
                 <div className="text-sm font-bold text-slate-900">
-                  ${(yacht.pricePerHour * 12).toLocaleString()}
+                  ${(Number(yacht.pricePerHour) * 12).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -212,15 +249,13 @@ export default async function AdminDashboard() {
             <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">3 New</span>
           </div>
           <div className="flex flex-col gap-4">
-            {[
-              { name: "Sarah Jenkins", email: "sarah@example.com", interest: "Corporate Event" },
-              { name: "Michael Chang", email: "m.chang@example.com", interest: "Sunset Cruise" },
-              { name: "David Miller", email: "david.m@example.com", interest: "Wedding Reception" },
-            ].map((lead, i) => (
-              <div key={i} className="flex items-center justify-between pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+            {newLeads.length === 0 ? (
+              <div className="text-sm text-slate-500 text-center py-4">No new leads.</div>
+            ) : newLeads.map((lead: any, i: number) => (
+              <div key={lead.id} className="flex items-center justify-between pb-4 border-b border-slate-100 last:border-0 last:pb-0">
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-slate-900">{lead.name}</span>
-                  <span className="text-xs text-slate-500">{lead.interest}</span>
+                  <span className="text-sm font-semibold text-slate-900">{lead.firstName} {lead.lastName}</span>
+                  <span className="text-xs text-slate-500">{lead.email}</span>
                 </div>
                 <button className="h-8 w-8 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center transition-colors">
                   <MessageSquare className="h-4 w-4 text-slate-500" />
@@ -239,22 +274,9 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div className="flex flex-col gap-5">
-            {[
-              { yacht: "The Azimut 60", rating: 5, text: "Absolutely incredible experience. The crew was professional." },
-              { yacht: "Sea Ray Sundancer", rating: 5, text: "Perfect day out on the water. Highly recommend." },
-            ].map((review, i) => (
-              <div key={i} className="flex flex-col gap-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{review.yacht}</span>
-                  <div className="flex">
-                    {[...Array(review.rating)].map((_, j) => (
-                      <Star key={j} className="h-3 w-3 text-amber-500 fill-amber-500" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-slate-700 italic">"{review.text}"</p>
-              </div>
-            ))}
+            <div className="text-sm text-slate-500 text-center py-4">
+              Review system pending integration.
+            </div>
           </div>
         </div>
 

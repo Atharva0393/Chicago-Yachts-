@@ -13,11 +13,14 @@ interface CustomerProfileProps {
   onClose: () => void
 }
 
+import { LeadStatus } from "@prisma/client"
+
 const STATUS_COLORS = {
-  LEAD: "bg-blue-100 text-blue-700",
+  NEW: "bg-blue-100 text-blue-700",
   CONTACTED: "bg-purple-100 text-purple-700",
   QUALIFIED: "bg-orange-100 text-orange-700",
-  CONVERTED: "bg-emerald-100 text-emerald-700",
+  BOOKING_IN_PROGRESS: "bg-emerald-100 text-emerald-700",
+  WON: "bg-emerald-100 text-emerald-700",
   LOST: "bg-red-100 text-red-700",
 }
 
@@ -29,8 +32,8 @@ export function CustomerProfile({ customer, bookings, isOpen, onClose }: Custome
 
   // Calculate LTV (Lifetime Value) - sum of COMPLETED bookings
   const ltv = bookings
-    .filter(b => b.status === "COMPLETED")
-    .reduce((sum, b) => sum + b.totalPrice, 0)
+    .filter(b => (b as any).bookingStatus === "COMPLETED" || b.status === "COMPLETED")
+    .reduce((sum, b) => sum + Number(b.totalPrice || (b as any).totalAmount || 0), 0)
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
@@ -47,7 +50,7 @@ export function CustomerProfile({ customer, bookings, isOpen, onClose }: Custome
   }
 
   const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = e.target.value as Customer["status"]
+    const newStatus = e.target.value as LeadStatus
     try {
       await updateCustomerStatus(customer.id, newStatus)
     } catch (error) {
@@ -72,17 +75,18 @@ export function CustomerProfile({ customer, bookings, isOpen, onClose }: Custome
             </div>
             
             {/* Status Dropdown */}
-            <select
-              value={customer.status || "LEAD"}
-              onChange={handleStatusChange}
-              className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full outline-none cursor-pointer border ${STATUS_COLORS[customer.status || "LEAD"]}`}
-            >
-              <option value="LEAD">Lead</option>
-              <option value="CONTACTED">Contacted</option>
-              <option value="QUALIFIED">Qualified</option>
-              <option value="CONVERTED">Converted</option>
-              <option value="LOST">Lost</option>
-            </select>
+              <select
+                value={(customer as any).leadStatus || customer.status || "NEW"}
+                onChange={handleStatusChange}
+                className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider appearance-none cursor-pointer border-none focus:ring-0 ${STATUS_COLORS[((customer as any).leadStatus || customer.status || "NEW") as keyof typeof STATUS_COLORS]}`}
+              >
+                <option value="NEW">New Lead</option>
+                <option value="CONTACTED">Contacted</option>
+                <option value="QUALIFIED">Qualified</option>
+                <option value="BOOKING_IN_PROGRESS">In Progress</option>
+                <option value="WON">Won</option>
+                <option value="LOST">Lost</option>
+              </select>
           </div>
           
           {/* Metrics */}
@@ -120,19 +124,19 @@ export function CustomerProfile({ customer, bookings, isOpen, onClose }: Custome
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-slate-900">{booking.yacht?.name}</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        booking.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' :
-                        booking.status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                        booking.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                        ((booking as any).bookingStatus || booking.status) === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' :
+                        ((booking as any).bookingStatus || booking.status) === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                        ((booking as any).bookingStatus || booking.status) === 'CANCELLED' ? 'bg-red-100 text-red-700' :
                         'bg-slate-100 text-slate-700'
                       }`}>
-                        {booking.status}
+                        {((booking as any).bookingStatus || booking.status)}
                       </span>
                     </div>
                     <div className="text-sm text-slate-500 space-y-1">
-                      <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {new Date(booking.date).toLocaleDateString()}</div>
-                      <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> {booking.timeSlot}</div>
+                      <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {new Date(((booking as any).startDateTime || booking.date)).toLocaleDateString()}</div>
+                      <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> {booking.timeSlot || "Custom"}</div>
                       <div className="flex items-center gap-2 text-slate-900 font-medium mt-2 pt-2 border-t border-slate-100">
-                        ${booking.totalPrice.toLocaleString()}
+                        ${Number(booking.totalPrice || (booking as any).totalAmount || 0).toLocaleString()}
                       </div>
                     </div>
                   </div>

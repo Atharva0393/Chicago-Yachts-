@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
-import { dataService } from "@/services/data.service";
 import { Yacht, CompanyInfo, Experience, FAQ, Testimonial } from "@/types";
 import { getAllYachtsAction } from "@/server/actions/yacht.actions";
+
+// Static imports
+import { companyInfo as companyData } from "@/lib/constants/company";
+import { experiences as experiencesData } from "@/lib/constants/experiences";
+import { faqs as faqsData } from "@/lib/constants/faqs";
+import { testimonials as testimonialsData } from "@/lib/constants/testimonials";
 
 export function useYachts() {
   const [yachts, setYachts] = useState<Yacht[]>([]);
@@ -22,10 +27,8 @@ export function useCompanyInfo() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dataService.getCompanyInfo().then((data) => {
-      setCompanyInfo(data);
-      setLoading(false);
-    });
+    setCompanyInfo(companyData);
+    setLoading(false);
   }, []);
 
   return { companyInfo, loading };
@@ -36,10 +39,8 @@ export function useExperiences() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dataService.getExperiences().then((data) => {
-      setExperiences(data);
-      setLoading(false);
-    });
+    setExperiences(experiencesData);
+    setLoading(false);
   }, []);
 
   return { experiences, loading };
@@ -50,10 +51,8 @@ export function useFAQs() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dataService.getFAQs().then((data) => {
-      setFaqs(data);
-      setLoading(false);
-    });
+    setFaqs(faqsData);
+    setLoading(false);
   }, []);
 
   return { faqs, loading };
@@ -64,10 +63,8 @@ export function useTestimonials() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dataService.getTestimonials().then((data) => {
-      setTestimonials(data);
-      setLoading(false);
-    });
+    setTestimonials(testimonialsData);
+    setLoading(false);
   }, []);
 
   return { testimonials, loading };

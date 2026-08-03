@@ -25,7 +25,7 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
     try {
       const res = await updateBookingStatus(id, status)
       if (res.success && res.booking) {
-        const updatedBookings = bookings.map(b => b.id === id ? { ...b, status: res.booking!.status } : b)
+        const updatedBookings = bookings.map(b => b.id === id ? { ...b, bookingStatus: res.booking!.bookingStatus } : b)
         setBookings(updatedBookings)
         if (selectedBooking?.id === id) {
           setSelectedBooking(updatedBookings.find(b => b.id === id) || null)

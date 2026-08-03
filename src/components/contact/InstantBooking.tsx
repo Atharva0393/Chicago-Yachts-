@@ -1,10 +1,9 @@
 import React from "react";
 import { Calendar, MessageSquare, PhoneCall, Search, MessageCircle, Phone } from "lucide-react";
 import Link from "next/link";
-import { dataService } from "@/services/data.service";
+import { companyInfo } from "@/lib/constants/company";
 
-export async function InstantBooking() {
-  const companyInfo = await dataService.getCompanyInfo();
+export function InstantBooking() {
   
   const options = [
     {

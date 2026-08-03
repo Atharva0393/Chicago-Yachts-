@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { dataService } from "@/services/data.service";
+import { experiences } from "@/lib/constants/experiences";
 
-export async function Experiences() {
-  const experiences = await dataService.getExperiences();  return (
+export function Experiences() {
+  return (
     <section className="w-full py-24 md:py-32 bg-background">
       <div className="container mx-auto px-4 md:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">

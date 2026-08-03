@@ -4,10 +4,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { dataService } from "@/services/data.service";
+import { faqs } from "@/lib/constants/faqs";
 
-export async function FAQ() {
-  const faqs = await dataService.getFAQs();
+export function FAQ() {
   return (
     <section className="w-full py-24 md:py-32 bg-background">
       <div className="container mx-auto px-4 md:px-8 flex flex-col lg:flex-row gap-16">
