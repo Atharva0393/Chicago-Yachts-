@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { BookingStatus, ActivityType } from "@prisma/client";
+import { notificationService } from "./notification.service";
+import { ExtendedBooking } from "./email.service";
 
 export class BookingLifecycleService {
   /**
@@ -81,7 +83,7 @@ export class BookingLifecycleService {
     return await db.$transaction(async (tx) => {
       const booking = await tx.booking.findUnique({
         where: { id: bookingId },
-        include: { timeSlots: true }
+        include: { timeSlots: true, customer: true, yacht: true }
       });
 
       if (!booking) throw new Error("Booking not found");
@@ -132,6 +134,12 @@ export class BookingLifecycleService {
             reason
           }
         }
+      });
+
+      // Send cancellation notification in the background
+      // Safe failure handling is inside the service
+      notificationService.sendBookingCancellation(booking as unknown as ExtendedBooking).catch(e => {
+        console.error("Non-fatal error sending cancellation notification", e);
       });
 
       return cancelledBooking!;

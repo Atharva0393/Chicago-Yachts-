@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { notificationService } from "./notification.service";
+import { ExtendedBooking } from "./email.service";
 
 // Simple fallback if you don't have a generator
 function generateBookingReference() {
@@ -64,7 +66,7 @@ export async function finalizePaidBooking(params: FinalizeBookingParams) {
   // ATOMIC DATABASE CONVERSION
   // We use an interactive transaction to carefully orchestrate and lock if needed.
   console.log("[DEBUG] Starting transaction for", stripeSessionId);
-  return await db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     // Re-fetch with a lock/strict check inside transaction
     console.log("[DEBUG] Refetching activeHold");
     const activeHold = await tx.bookingHold.findUnique({
@@ -238,4 +240,23 @@ export async function finalizePaidBooking(params: FinalizeBookingParams) {
     maxWait: 5000,
     timeout: 10000,
   });
+
+  // If transaction succeeded and we didn't just return ALREADY_CONVERTED
+  if (result.status === "SUCCESS") {
+    // 9. Send Notifications in the background safely
+    db.booking.findUnique({
+      where: { id: result.bookingId },
+      include: { customer: true, yacht: true }
+    }).then(booking => {
+      if (booking) {
+        notificationService.sendBookingConfirmation(booking as unknown as ExtendedBooking).catch(e => {
+          console.error("Non-fatal error sending confirmation notification", e);
+        });
+      }
+    }).catch(e => {
+      console.error("Failed to load booking for notification", e);
+    });
+  }
+
+  return result;
 }

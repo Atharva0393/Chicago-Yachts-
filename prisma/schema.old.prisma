@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+﻿// This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -285,9 +285,9 @@ model BookingHold {
   // Financial Snapshot (server-computed, immutable after hold creation)
   subtotal          Decimal? @db.Decimal(10, 2)
   totalAmount       Decimal? @db.Decimal(10, 2)
-  depositAmount     Decimal? @db.Decimal(10, 2) // 30% of totalAmount — CONFIRMED Chicago Yachts deposit policy
-  remainingBalance  Decimal? @db.Decimal(10, 2) // 70% of totalAmount — due on charter date
-  depositPercentage Decimal? @db.Decimal(5, 2) // Policy snapshot (30.00) — preserved for historical accuracy
+  depositAmount     Decimal? @db.Decimal(10, 2) // 30% of totalAmount ΓÇö CONFIRMED Chicago Yachts deposit policy
+  remainingBalance  Decimal? @db.Decimal(10, 2) // 70% of totalAmount ΓÇö due on charter date
+  depositPercentage Decimal? @db.Decimal(5, 2) // Policy snapshot (30.00) ΓÇö preserved for historical accuracy
   pricingRuleId     String?
 
   yachtId String
@@ -348,7 +348,6 @@ model Booking {
   notes     BookingNote[]
   addOns    BookingAddOn[]
   payments  PaymentTransaction[]
-  notifications Notification[]
 
   // Timestamps
   createdAt   DateTime  @default(now())
@@ -450,7 +449,6 @@ model Customer {
   notes         CustomerNote[]
   activities    CustomerActivity[]
   conversations Conversation[]
-  notifications Notification[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -520,13 +518,6 @@ model Notification {
   error      String?             @db.Text
 
   recipient String // Email address or Phone number
-  sentAt    DateTime?
-
-  bookingId String?
-  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-
-  customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
