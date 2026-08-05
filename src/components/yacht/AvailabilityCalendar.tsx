@@ -99,11 +99,12 @@ export function AvailabilityCalendar() {
     }
   };
 
-  const debugInfo = (availableSlots as any)._debug;
+  const debugInfo = (availableSlots as any)._debug || (availableSlots as any).debug;
   const availableCount = Object.values(availableSlots)
     .filter(d => d && typeof d === 'object' && 'slots' in d)
     .filter(d => Object.values((d as any).slots).some((s: any) => s === "available")).length;
-  const availKeys = Object.keys(availableSlots).filter(k => k !== "_debug");
+  const rawKeys = Object.keys(availableSlots);
+  const availKeys = rawKeys.filter(k => k !== "_debug" && k !== "debug");
 
   return (
     <section className="py-10 border-b border-slate-100">
@@ -113,9 +114,10 @@ export function AvailabilityCalendar() {
       {/* TEMPORARY MINIMAL DEBUG UI FOR LIVE BROWSER VERIFICATION */}
       <div className="max-w-md mb-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-mono text-amber-900 space-y-1">
         <div className="font-bold text-amber-950 pb-1 border-b border-amber-200 mb-1">
-          LIVE_BUILD_MARKER: 5bfff9b-debug-v2
+          LIVE_BUILD_MARKER: 5bfff9b-debug-v3
         </div>
         <div>DEBUG yachtId: {yachtId || "EMPTY"}</div>
+        <div>DEBUG raw keys: {rawKeys.join(", ") || "none"}</div>
         <div>DEBUG availability keys: {availKeys.length} ({availKeys.slice(0, 3).join(", ") || "none"}...)</div>
         <div>DEBUG available count: {availableCount}</div>
         <div>DEBUG displayed month: {monthLabel}</div>
@@ -123,13 +125,18 @@ export function AvailabilityCalendar() {
         <div className="pt-2 border-t border-amber-200 mt-2 space-y-1">
           {debugInfo ? (
             <>
-              <div>SERVER yachtExists: {debugInfo.yachtExists ? "YES" : "NO"}</div>
-              <div>SERVER raw Availability: {debugInfo.availabilityRowCount}</div>
-              <div>SERVER raw TimeSlots: {debugInfo.timeSlotRowCount}</div>
-              <div>SERVER filtered Availability: {debugInfo.filteredAvailabilityCount}</div>
-              <div>SERVER filtered TimeSlots: {debugInfo.filteredTimeSlotCount}</div>
+              <div>SERVER yachtExists: {debugInfo.yachtExists !== undefined ? (debugInfo.yachtExists ? "YES" : "NO") : "undefined"}</div>
+              <div>SERVER raw Availability: {debugInfo.availabilityRowCount !== undefined ? String(debugInfo.availabilityRowCount) : "undefined"}</div>
+              <div>SERVER raw TimeSlots: {debugInfo.timeSlotRowCount !== undefined ? String(debugInfo.timeSlotRowCount) : "undefined"}</div>
+              <div>SERVER filtered Availability: {debugInfo.filteredAvailabilityCount !== undefined ? String(debugInfo.filteredAvailabilityCount) : "undefined"}</div>
+              <div>SERVER filtered TimeSlots: {debugInfo.filteredTimeSlotCount !== undefined ? String(debugInfo.filteredTimeSlotCount) : "undefined"}</div>
               <div>SERVER final dates: {availKeys.length}</div>
-              <div>SERVER dbHost: {debugInfo.databaseHostFingerprint}</div>
+              <div>SERVER dbHost: {debugInfo.databaseHostFingerprint || "undefined"}</div>
+              {debugInfo.error && (
+                <div className="text-red-600 font-bold mt-1">
+                  SERVER error: {debugInfo.error}
+                </div>
+              )}
             </>
           ) : (
             <div className="text-red-600 font-bold">

@@ -171,7 +171,7 @@ export async function getPublicAvailability(yachtId: string, month: number, year
     }
 
     // Attach temporary safe diagnostics
-    (result as any)._debug = {
+    const debugInfo = {
       yachtId,
       yachtExists: yachtCount > 0,
       rawYachtCount: yachtCount,
@@ -181,13 +181,34 @@ export async function getPublicAvailability(yachtId: string, month: number, year
       filteredTimeSlotCount,
       requestedStart: startDate.toISOString(),
       requestedEnd: endDate.toISOString(),
-      databaseHostFingerprint: dbHost
+      databaseHostFingerprint: dbHost,
+      serverTime: new Date().toISOString(),
+      error: null
     };
+    (result as any)._debug = debugInfo;
+    (result as any).debug = debugInfo;
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to get public availability:", error);
-    return {};
+    const result: any = {};
+    const errDebug = {
+      yachtId,
+      yachtExists: false,
+      rawYachtCount: 0,
+      availabilityRowCount: 0,
+      timeSlotRowCount: 0,
+      filteredAvailabilityCount: 0,
+      filteredTimeSlotCount: 0,
+      requestedStart: "",
+      requestedEnd: "",
+      databaseHostFingerprint: "error",
+      serverTime: new Date().toISOString(),
+      error: error?.message || String(error)
+    };
+    result._debug = errDebug;
+    result.debug = errDebug;
+    return result;
   }
 }
 
