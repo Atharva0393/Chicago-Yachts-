@@ -4,9 +4,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBooking } from "@/lib/contexts/BookingContext";
 
 export function AvailabilityCalendar() {
-  const { selectedDate, setSelectedDate, duration, availableSlots, isLoadingAvailability } = useBooking();
+  const { yachtId, selectedDate, setSelectedDate, duration, availableSlots, isLoadingAvailability, fetchAvailability } = useBooking();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const year = new Date().getFullYear(); // dynamic
+  const [year, setYear] = useState(new Date().getFullYear());
   
   const daysInMonth = new Date(year, currentMonth + 1, 0).getDate();
   const firstDay = new Date(year, currentMonth, 1).getDay();
@@ -14,9 +14,41 @@ export function AvailabilityCalendar() {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDay }, (_, i) => i);
 
+  const handlePrevMonth = () => {
+    let newM = currentMonth - 1;
+    let newY = year;
+    if (newM < 0) {
+      newM = 11;
+      newY = year - 1;
+    }
+    setCurrentMonth(newM);
+    setYear(newY);
+    fetchAvailability(yachtId, newM, newY);
+  };
+
+  const handleNextMonth = () => {
+    let newM = currentMonth + 1;
+    let newY = year;
+    if (newM > 11) {
+      newM = 0;
+      newY = year + 1;
+    }
+    setCurrentMonth(newM);
+    setYear(newY);
+    fetchAvailability(yachtId, newM, newY);
+  };
+
+  const monthLabel = new Date(year, currentMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
   // Status reading from availableSlots service data
   const getStatus = (day: number) => {
     const dateStr = `${year}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
+    // Check if day is in the past
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    if (dateStr < todayStr) return 'booked';
+
     const dayData = availableSlots[dateStr];
     
     if (isLoadingAvailability) return 'loading';
@@ -33,10 +65,8 @@ export function AvailabilityCalendar() {
   };
 
   const handleDayClick = (day: number) => {
-    // Create new date in local timezone
     const newDate = new Date(year, currentMonth, day);
     
-    // Toggle off if same date
     if (selectedDate && 
         selectedDate.getDate() === day && 
         selectedDate.getMonth() === currentMonth && 
@@ -54,11 +84,19 @@ export function AvailabilityCalendar() {
       
       <div className="max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <button className="w-8 h-8 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors">
+          <button 
+            onClick={handlePrevMonth}
+            className="w-8 h-8 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors"
+            aria-label="Previous Month"
+          >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="font-medium text-slate-900">August 2026</span>
-          <button className="w-8 h-8 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors">
+          <span className="font-medium text-slate-900">{monthLabel}</span>
+          <button 
+            onClick={handleNextMonth}
+            className="w-8 h-8 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors"
+            aria-label="Next Month"
+          >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

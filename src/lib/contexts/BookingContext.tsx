@@ -82,6 +82,7 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
   // Load initial availability
   useEffect(() => {
     const now = new Date();
+    setAvailableSlots({});
     fetchAvailability(yachtId, now.getMonth(), now.getFullYear());
   }, [yachtId]);
 
@@ -89,7 +90,7 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
     setIsLoadingAvailability(true);
     try {
       const data = await availabilityService.getAvailability(id, month, year);
-      setAvailableSlots(prev => ({ ...prev, ...data }));
+      setAvailableSlots(data);
     } catch (e) {
       console.error("Failed to fetch availability", e);
     } finally {
