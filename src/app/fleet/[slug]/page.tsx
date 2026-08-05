@@ -57,6 +57,7 @@ const getSimilarYachts = async (currentId: string) => {
   const yachts = await yachtRepository.getAllYachts();
   return yachts.filter(y => y.id !== currentId).slice(0, 4).map(y => ({
      id: y.id,
+     slug: y.slug,
      name: y.name,
      manufacturer: y.manufacturer,
      price: y.pricePerHour * 4,

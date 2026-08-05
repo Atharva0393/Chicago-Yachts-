@@ -86,7 +86,7 @@ export default function ComparePage() {
                   <h3 className="text-xl md:text-2xl font-semibold tracking-tight mb-2">{yacht.name}</h3>
                   <p className="text-lg text-muted-foreground mb-6 font-medium">${yacht.pricePerHour}<span className="text-sm">/hr</span></p>
                   <Link 
-                    href={`/fleet/${yacht.id}/book`}
+                    href={`/fleet/${yacht.slug || yacht.id}/book`}
                     className="w-full bg-primary text-primary-foreground py-3 rounded-full font-semibold hover:bg-primary/90 transition-colors shadow-[var(--shadow-premium)]"
                   >
                     Book Now

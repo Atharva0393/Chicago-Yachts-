@@ -53,7 +53,7 @@ export function RecentlyViewedCarousel({ currentYachtId }: Props) {
             key={yacht.id} 
             className="snap-start shrink-0 w-[280px] md:w-[320px] group flex flex-col gap-3 active:scale-[0.98] transition-transform duration-300"
           >
-            <Link href={`/fleet/${yacht.id}`} className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-sm group-hover:shadow-lg transition-luxury">
+            <Link href={`/fleet/${yacht.slug || yacht.id}`} className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted shadow-sm group-hover:shadow-lg transition-luxury">
               <Image 
                 src={yacht.images[0]} 
                 alt={yacht.name}
@@ -65,7 +65,7 @@ export function RecentlyViewedCarousel({ currentYachtId }: Props) {
 
             <div className="flex flex-col px-1">
               <div className="flex justify-between items-start mb-1">
-                <Link href={`/fleet/${yacht.id}`} className="hover:text-primary transition-colors">
+                <Link href={`/fleet/${yacht.slug || yacht.id}`} className="hover:text-primary transition-colors">
                   <h3 className="font-semibold text-lg tracking-tight line-clamp-1">{yacht.name}</h3>
                 </Link>
                 <div className="flex items-center gap-1 shrink-0 bg-muted/40 px-2 py-0.5 rounded-md text-sm font-semibold">
@@ -86,7 +86,7 @@ export function RecentlyViewedCarousel({ currentYachtId }: Props) {
                 </div>
                 
                 <Link 
-                  href={`/fleet/${yacht.id}/book`}
+                  href={`/fleet/${yacht.slug || yacht.id}/book`}
                   className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-1 group/btn"
                 >
                   Book <ArrowRight className="h-3 w-3 group-hover/btn:translate-x-0.5 transition-transform" />

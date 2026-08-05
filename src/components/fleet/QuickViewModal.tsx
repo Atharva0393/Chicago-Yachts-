@@ -102,12 +102,12 @@ export function QuickViewModal({ isOpen, onClose, yacht }: QuickViewModalProps) 
               </div>
             </div>
             <div className="flex gap-3">
-              <Link href={`/fleet/${yacht.id}`} className="flex-1">
+              <Link href={`/fleet/${yacht.slug || yacht.id}`} className="flex-1">
                 <Button variant="outline" className="w-full rounded-full h-12 border-slate-200 hover:bg-slate-50 text-slate-900 font-medium">
                   Full Details
                 </Button>
               </Link>
-              <Link href={`/fleet/${yacht.id}/book`} className="flex-1">
+              <Link href={`/fleet/${yacht.slug || yacht.id}/book`} className="flex-1">
                 <Button className="w-full rounded-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium hover-lift">
                   Book Now
                 </Button>

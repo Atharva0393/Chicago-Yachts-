@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 const yachts = [
   {
     id: "aquila-44",
+    slug: "aquila-44",
     name: "Aquila 44",
     capacity: 12,
     price: 850,
@@ -15,6 +16,7 @@ const yachts = [
   },
   {
     id: "sea-ray-l650",
+    slug: "sea-ray-l650",
     name: "Sea Ray L650 Fly",
     capacity: 13,
     price: 1200,
@@ -23,6 +25,7 @@ const yachts = [
   },
   {
     id: "azimut-S6",
+    slug: "azimut-s6",
     name: "Azimut S6",
     capacity: 10,
     price: 1500,
@@ -53,7 +56,7 @@ export function DestinationYachts() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {yachts.map((yacht) => (
-            <Link href={`/fleet/${yacht.id}`} key={yacht.id} className="group bg-white rounded-[24px] p-4 border border-slate-100 hover:shadow-premium transition-luxury flex flex-col block">
+            <Link href={`/fleet/${yacht.slug || yacht.id}`} key={yacht.id} className="group bg-white rounded-[24px] p-4 border border-slate-100 hover:shadow-premium transition-luxury flex flex-col block">
               <div className="relative h-60 w-full rounded-[16px] overflow-hidden mb-6">
                 <Image
                   src={yacht.image}

@@ -52,6 +52,7 @@ export default function WishlistPage() {
           <YachtCard 
             key={yacht.id}
             id={yacht.id}
+            slug={yacht.slug}
             name={yacht.name}
             image={yacht.images?.[0]}
             price={yacht.pricePerHour}

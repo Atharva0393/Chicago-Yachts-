@@ -24,6 +24,7 @@ function FleetContent() {
   
   const allYachts = rawYachts.map(yacht => ({
     id: yacht.id,
+    slug: yacht.slug,
     name: yacht.name,
     manufacturer: yacht.manufacturer,
     image: yacht.images?.[0] || "",

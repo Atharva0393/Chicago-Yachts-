@@ -29,6 +29,7 @@ export async function Recommendations({ currentYachtId }: Props) {
             >
               <YachtCard 
                 id={yacht.id}
+                slug={yacht.slug}
                 name={yacht.name}
                 image={yacht.images[0]}
                 price={yacht.pricePerHour}
