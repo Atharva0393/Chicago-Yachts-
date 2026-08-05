@@ -28,9 +28,11 @@ export type AdminDayAvailability = DayAvailability & {
   }
 };
 
-function buildDate(year: number, month: number, day: number) {
-  // Always work in UTC to prevent timezone shifts
-  return new Date(Date.UTC(year, month, day));
+function buildDate(year: number | string, month: number | string, day: number | string) {
+  const y = typeof year === "string" ? parseInt(year, 10) : Number(year);
+  const m = typeof month === "string" ? parseInt(month, 10) : Number(month);
+  const d = typeof day === "string" ? parseInt(day, 10) : Number(day);
+  return new Date(Date.UTC(y, m, d));
 }
 
 function getSlotName(startHour: number): "Morning" | "Afternoon" | "Evening" | null {
@@ -58,87 +60,98 @@ function getChicagoTodayUTC(): Date {
  * Public method to get availability for a yacht in a specific month
  */
 export async function getPublicAvailability(yachtId: string, month: number, year: number): Promise<Record<string, DayAvailability>> {
-  const startDate = buildDate(year, month, 1);
-  const endDate = buildDate(year, month + 1, 0); // Last day of month
-  const chicagoTodayUTC = getChicagoTodayUTC();
+  try {
+    const numMonth = typeof month === "string" ? parseInt(month, 10) : Number(month);
+    const numYear = typeof year === "string" ? parseInt(year, 10) : Number(year);
 
-  const availabilities = await db.availability.findMany({
-    where: {
-      yachtId,
-      date: {
-        gte: startDate,
-        lte: endDate,
-      }
-    },
-    include: {
-      timeSlots: {
-        include: {
-          bookingHold: true
+    if (!yachtId) return {};
+
+    const startDate = buildDate(numYear, numMonth, 1);
+    const endDate = buildDate(numYear, numMonth + 1, 0); // Last day of month
+    const chicagoTodayUTC = getChicagoTodayUTC();
+
+    const availabilities = await db.availability.findMany({
+      where: {
+        yachtId,
+        date: {
+          gte: startDate,
+          lte: endDate,
         }
-      }
-    }
-  });
-
-  const daysInMonth = endDate.getUTCDate();
-  const result: Record<string, DayAvailability> = {};
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const dateObj = buildDate(year, month, day);
-    
-    // Find DB record
-    const dbRecord = availabilities.find(a => a.date.getTime() === dateObj.getTime());
-    
-    let morning = "booked" as AvailabilityStatus;
-    let afternoon = "booked" as AvailabilityStatus;
-    let evening = "booked" as AvailabilityStatus;
-
-    // PAST DATE PROTECTION
-    if (dateObj.getTime() < chicagoTodayUTC.getTime()) {
-      // Past dates are strictly booked/unavailable
-    } else if (dbRecord && !dbRecord.isBlocked) {
-      // Check each timeslot
-      for (const slot of dbRecord.timeSlots) {
-        const startHour = slot.startTime.getUTCHours();
-        const slotName = getSlotName(startHour);
-        if (slotName && !slot.isBlocked) {
-          let status: AvailabilityStatus = "available";
-          
-          if (slot.bookingId) {
-            status = "booked"; // Booking-aware
-          } else if (slot.bookingHold) {
-            const hold = slot.bookingHold;
-            const now = new Date();
-            // Active BookingHold-aware: expired hold does not permanently block
-            if (hold.status === 'ACTIVE' && hold.expiresAt > now) {
-              status = "pending";
-            }
+      },
+      include: {
+        timeSlots: {
+          include: {
+            bookingHold: true
           }
-          
-          if (slotName === "Morning") morning = status;
-          if (slotName === "Afternoon") afternoon = status;
-          if (slotName === "Evening") evening = status;
         }
       }
+    });
+
+    const daysInMonth = endDate.getUTCDate();
+    const result: Record<string, DayAvailability> = {};
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${numYear}-${String(numMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dateObj = buildDate(numYear, numMonth, day);
+      
+      // Find DB record
+      const dbRecord = availabilities.find(a => new Date(a.date).getTime() === dateObj.getTime());
+      
+      let morning = "booked" as AvailabilityStatus;
+      let afternoon = "booked" as AvailabilityStatus;
+      let evening = "booked" as AvailabilityStatus;
+
+      // PAST DATE PROTECTION
+      if (dateObj.getTime() < chicagoTodayUTC.getTime()) {
+        // Past dates are strictly booked/unavailable
+      } else if (dbRecord && !dbRecord.isBlocked) {
+        // Check each timeslot
+        for (const slot of dbRecord.timeSlots) {
+          const slotTime = new Date(slot.startTime);
+          const startHour = slotTime.getUTCHours();
+          const slotName = getSlotName(startHour);
+          if (slotName && !slot.isBlocked) {
+            let status: AvailabilityStatus = "available";
+            
+            if (slot.bookingId) {
+              status = "booked"; // Booking-aware
+            } else if (slot.bookingHold) {
+              const hold = slot.bookingHold;
+              const now = new Date();
+              // Active BookingHold-aware: expired hold does not permanently block
+              if (hold.status === 'ACTIVE' && new Date(hold.expiresAt) > now) {
+                status = "pending";
+              }
+            }
+            
+            if (slotName === "Morning") morning = status;
+            if (slotName === "Afternoon") afternoon = status;
+            if (slotName === "Evening") evening = status;
+          }
+        }
+      }
+
+      // Full Day requires all 3 to be available
+      const fullDayAvailable = morning === 'available' && afternoon === 'available' && evening === 'available';
+      const fullDayPending = !fullDayAvailable && (morning === 'pending' || afternoon === 'pending' || evening === 'pending');
+      const fullDayStatus: AvailabilityStatus = fullDayAvailable ? "available" : (fullDayPending ? "pending" : "booked");
+
+      result[dateStr] = {
+        date: dateStr,
+        slots: {
+          Morning: morning,
+          Afternoon: afternoon,
+          Evening: evening,
+          "Full Day": fullDayStatus
+        }
+      };
     }
 
-    // Full Day requires all 3 to be available
-    const fullDayAvailable = morning === 'available' && afternoon === 'available' && evening === 'available';
-    const fullDayPending = !fullDayAvailable && (morning === 'pending' || afternoon === 'pending' || evening === 'pending');
-    const fullDayStatus: AvailabilityStatus = fullDayAvailable ? "available" : (fullDayPending ? "pending" : "booked");
-
-    result[dateStr] = {
-      date: dateStr,
-      slots: {
-        Morning: morning,
-        Afternoon: afternoon,
-        Evening: evening,
-        "Full Day": fullDayStatus
-      }
-    };
+    return result;
+  } catch (error) {
+    console.error("Failed to get public availability:", error);
+    return {};
   }
-
-  return result;
 }
 
 /**

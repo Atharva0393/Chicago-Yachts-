@@ -81,16 +81,26 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
 
   // Load initial availability
   useEffect(() => {
+    if (!yachtId || yachtId === "1") return;
     const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: 'numeric' });
+    const parts = formatter.formatToParts(now);
+    let month = now.getMonth();
+    let year = now.getFullYear();
+    for (const p of parts) {
+      if (p.type === 'month') month = parseInt(p.value, 10) - 1;
+      if (p.type === 'year') year = parseInt(p.value, 10);
+    }
     setAvailableSlots({});
-    fetchAvailability(yachtId, now.getMonth(), now.getFullYear());
+    fetchAvailability(yachtId, month, year);
   }, [yachtId]);
 
   const fetchAvailability = async (id: string, month: number, year: number) => {
+    if (!id || id === "1") return;
     setIsLoadingAvailability(true);
     try {
       const data = await availabilityService.getAvailability(id, month, year);
-      setAvailableSlots(data);
+      setAvailableSlots(data || {});
     } catch (e) {
       console.error("Failed to fetch availability", e);
     } finally {
