@@ -28,6 +28,7 @@ const getYachtBySlug = async (slug: string) => {
 
   return {
     id: yacht.id,
+    slug: yacht.slug,
     name: yacht.name,
     manufacturer: yacht.manufacturer,
     rating: yacht.rating,
