@@ -66,6 +66,24 @@ export async function getPublicAvailability(yachtId: string, month: number, year
 
     if (!yachtId) return {};
 
+    let dbHost = "unknown";
+    try {
+      const dbUrl = process.env.DATABASE_URL || "";
+      const match = dbUrl.match(/@([^:\/]+)/);
+      if (match && match[1]) {
+        dbHost = match[1];
+      } else if (dbUrl) {
+        dbHost = dbUrl.substring(0, 20) + "...";
+      }
+    } catch (e) {}
+
+    // Raw PostgreSQL queries inside Vercel server action runtime
+    const yachtCount = await db.yacht.count({ where: { id: yachtId } });
+    const rawAvailabilityCount = await db.availability.count({ where: { yachtId } });
+    const rawTimeSlotCount = await db.timeSlot.count({
+      where: { availability: { yachtId } }
+    });
+
     const startDate = buildDate(numYear, numMonth, 1);
     const endDate = buildDate(numYear, numMonth + 1, 0); // Last day of month
     const chicagoTodayUTC = getChicagoTodayUTC();
@@ -86,6 +104,11 @@ export async function getPublicAvailability(yachtId: string, month: number, year
         }
       }
     });
+
+    let filteredTimeSlotCount = 0;
+    for (const a of availabilities) {
+      filteredTimeSlotCount += a.timeSlots.length;
+    }
 
     const daysInMonth = endDate.getUTCDate();
     const result: Record<string, DayAvailability> = {};
@@ -146,6 +169,20 @@ export async function getPublicAvailability(yachtId: string, month: number, year
         }
       };
     }
+
+    // Attach temporary safe diagnostics
+    (result as any)._debug = {
+      yachtId,
+      yachtExists: yachtCount > 0,
+      rawYachtCount: yachtCount,
+      availabilityRowCount: rawAvailabilityCount,
+      timeSlotRowCount: rawTimeSlotCount,
+      filteredAvailabilityCount: availabilities.length,
+      filteredTimeSlotCount,
+      requestedStart: startDate.toISOString(),
+      requestedEnd: endDate.toISOString(),
+      databaseHostFingerprint: dbHost
+    };
 
     return result;
   } catch (error) {

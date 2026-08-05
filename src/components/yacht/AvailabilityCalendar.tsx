@@ -99,8 +99,11 @@ export function AvailabilityCalendar() {
     }
   };
 
-  const availableCount = Object.values(availableSlots).filter(d => Object.values(d.slots).some(s => s === "available")).length;
-  const availKeys = Object.keys(availableSlots);
+  const debugInfo = (availableSlots as any)._debug;
+  const availableCount = Object.values(availableSlots)
+    .filter(d => d && typeof d === 'object' && 'slots' in d)
+    .filter(d => Object.values(d.slots).some(s => s === "available")).length;
+  const availKeys = Object.keys(availableSlots).filter(k => k !== "_debug");
 
   return (
     <section className="py-10 border-b border-slate-100">
@@ -113,6 +116,16 @@ export function AvailabilityCalendar() {
         <div>DEBUG availability keys: {availKeys.length} ({availKeys.slice(0, 3).join(", ") || "none"}...)</div>
         <div>DEBUG available count: {availableCount}</div>
         <div>DEBUG displayed month: {monthLabel}</div>
+        {debugInfo && (
+          <div className="pt-2 border-t border-amber-200 mt-2 space-y-1">
+            <div>SERVER yachtExists: {debugInfo.yachtExists ? "YES" : "NO"}</div>
+            <div>SERVER raw Availability: {debugInfo.availabilityRowCount}</div>
+            <div>SERVER raw TimeSlots: {debugInfo.timeSlotRowCount}</div>
+            <div>SERVER filtered Availability: {debugInfo.filteredAvailabilityCount}</div>
+            <div>SERVER filtered TimeSlots: {debugInfo.filteredTimeSlotCount}</div>
+            <div>SERVER dbHost: {debugInfo.databaseHostFingerprint}</div>
+          </div>
+        )}
       </div>
       
       <div className="max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
