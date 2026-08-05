@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 interface YachtCardProps {
   id: string | number;
+  slug?: string;
   name: string;
   manufacturer?: string;
   image: string;
@@ -26,6 +27,7 @@ interface YachtCardProps {
 
 export function YachtCard({
   id,
+  slug,
   name,
   manufacturer,
   image,
@@ -70,7 +72,7 @@ export function YachtCard({
 
   return (
     <div className="group relative flex flex-col gap-4 active:scale-[0.99] transition-transform duration-300 h-full bg-white rounded-3xl p-4 border border-slate-100 hover:shadow-premium hover:-translate-y-1">
-      <Link href={`/fleet/${id}`} className="absolute inset-0 z-0" aria-label={`View details for ${name}`} />
+      <Link href={`/fleet/${slug || id}`} className="absolute inset-0 z-0" aria-label={`View details for ${name}`} />
       
       <div className="relative aspect-[4/3] overflow-hidden rounded-[16px] bg-slate-100 shadow-sm pointer-events-none">
         <Image 
@@ -171,13 +173,13 @@ export function YachtCard({
           
           <div className="flex gap-2 pointer-events-auto">
             <Link 
-              href={`/fleet/${id}`}
+              href={`/fleet/${slug || id}`}
               className="flex-1 bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors text-center"
             >
               Details
             </Link>
             <Link 
-              href={`/fleet/${id}/book`}
+              href={`/fleet/${slug || id}/book`}
               className="flex-1 bg-slate-900 text-white hover:bg-slate-800 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors text-center shadow-md"
             >
               Book Now
