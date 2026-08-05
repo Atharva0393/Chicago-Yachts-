@@ -93,6 +93,9 @@ export class YachtRepository {
    * Retrieves a single yacht by its slug (or ID as fallback if a UUID is passed).
    */
   async getYachtBySlug(slug: string): Promise<Yacht | null> {
+    if (!slug || typeof slug !== "string" || !slug.trim()) {
+      return null;
+    }
     try {
       // Use findFirst instead of findUnique because the live DB might be missing the UNIQUE constraint on slug
       let yacht = await db.yacht.findFirst({

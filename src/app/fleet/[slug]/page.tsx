@@ -71,8 +71,12 @@ const getSimilarYachts = async (currentId: string) => {
   }));
 };
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const yacht = await getYachtBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> | { slug: string } }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  if (!slug) return { title: "Yacht Not Found | Chicago Yachts" };
+
+  const yacht = await getYachtBySlug(slug);
   if (!yacht) return { title: "Yacht Not Found | Chicago Yachts" };
   
   return {
@@ -81,16 +85,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function YachtDetailPage({ params }: { params: { slug: string } }) {
-  const yacht = await getYachtBySlug(params.slug);
-  const similarYachts = await getSimilarYachts(params.slug);
+export default async function YachtDetailPage({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+
+  if (!slug) {
+    notFound();
+  }
+
+  const yacht = await getYachtBySlug(slug);
 
   if (!yacht) {
     notFound();
   }
 
+  const similarYachts = await getSimilarYachts(yacht.id);
+
   // Enforce canonical slug routing
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.slug)) {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)) {
     redirect(`/fleet/${yacht.slug}`);
   }
 
