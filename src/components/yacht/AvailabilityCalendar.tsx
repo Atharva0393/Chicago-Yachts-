@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBooking } from "@/lib/contexts/BookingContext";
 
 export function AvailabilityCalendar() {
-  const { selectedDate, setSelectedDate, duration, availableSlots } = useBooking();
+  const { selectedDate, setSelectedDate, duration, availableSlots, isLoadingAvailability } = useBooking();
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const year = new Date().getFullYear(); // dynamic
   
@@ -19,13 +19,15 @@ export function AvailabilityCalendar() {
     const dateStr = `${year}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayData = availableSlots[dateStr];
     
-    if (!dayData) return 'available'; // Default while loading
+    if (isLoadingAvailability) return 'loading';
+    if (!dayData) return 'booked'; // Default to booked if no data
     
-    // If Full Day is booked, the whole day is booked
-    if (dayData.slots['Full Day'] === 'booked') return 'booked';
-    
-    // If Full Day is pending, the whole day is pending
-    if (dayData.slots['Full Day'] === 'pending') return 'pending';
+    // Check if ANY slot is available or pending
+    const hasAvailable = Object.values(dayData.slots).some(s => s === 'available');
+    const hasPending = Object.values(dayData.slots).some(s => s === 'pending');
+
+    if (!hasAvailable && !hasPending) return 'booked';
+    if (!hasAvailable && hasPending) return 'pending';
     
     return 'available';
   };
@@ -85,8 +87,9 @@ export function AvailabilityCalendar() {
                   ${!isSelected && status === 'available' ? 'text-slate-900 hover:bg-slate-100' : ''}
                   ${!isSelected && status === 'booked' ? 'text-slate-300 line-through cursor-not-allowed' : ''}
                   ${!isSelected && status === 'pending' ? 'text-amber-500 bg-amber-50 hover:bg-amber-100' : ''}
+                  ${!isSelected && status === 'loading' ? 'text-slate-300 animate-pulse' : ''}
                 `}
-                disabled={status === 'booked'}
+                disabled={status === 'booked' || status === 'loading'}
               >
                 {d}
               </button>

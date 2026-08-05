@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon, Clock, Users, ChevronDown, CheckCircle2, Load
 import { Button } from "@/components/ui/button";
 import { useBooking } from "@/lib/contexts/BookingContext";
 import { useParams, useRouter } from "next/navigation";
+import { TimeSlot } from "@/services/availability.service";
 
 export function PricingBreakdown() {
   const { quote, quoteStatus } = useBooking();
@@ -59,7 +60,7 @@ export function PricingBreakdown() {
 }
 
 export function BookingPanel() {
-  const { quote, quoteStatus } = useBooking();
+  const { quote, quoteStatus, selectedDate, timeSlot, setTimeSlot, availableSlots } = useBooking();
   const params = useParams();
   const router = useRouter();
   
@@ -70,6 +71,19 @@ export function BookingPanel() {
       router.push(`/book/${slug}`);
     }
   };
+
+  const formatDate = (date: Date) => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+
+  const dayData = selectedDate ? availableSlots[formatDate(selectedDate)] : null;
+  const availableOptions = dayData 
+    ? (Object.keys(dayData.slots) as TimeSlot[]).filter(s => dayData.slots[s] === 'available' || dayData.slots[s] === 'pending') // pending slots might be allowed to queue? Actually only 'available'. Let's strictly use 'available'.
+    : [];
+
+  const actualAvailableOptions = dayData 
+    ? (Object.keys(dayData.slots) as TimeSlot[]).filter(s => dayData.slots[s] === 'available')
+    : [];
 
   const isBookable = quoteStatus === "SUCCESS" && quote;
 
@@ -83,6 +97,33 @@ export function BookingPanel() {
         </span>
         {quote && <span className="text-sm font-light text-slate-500">total</span>}
       </div>
+
+      {selectedDate && dayData && actualAvailableOptions.length > 0 && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-slate-900 mb-2">Select Time</label>
+          <div className="grid grid-cols-2 gap-2">
+            {actualAvailableOptions.map(slot => (
+              <button
+                key={slot}
+                onClick={() => setTimeSlot(slot)}
+                className={`py-2 px-3 text-sm rounded-xl border transition-all text-center ${
+                  timeSlot === slot
+                    ? 'border-slate-900 bg-slate-900 text-white'
+                    : 'border-slate-200 text-slate-700 hover:border-slate-400'
+                }`}
+              >
+                {slot}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedDate && dayData && actualAvailableOptions.length === 0 && (
+        <div className="mb-6 text-sm text-red-500 bg-red-50 p-3 rounded-xl border border-red-100">
+          No available time slots on this date.
+        </div>
+      )}
 
       <Button 
         onClick={handleStartBooking}
