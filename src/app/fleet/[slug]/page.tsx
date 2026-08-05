@@ -14,8 +14,9 @@ import { YachtFAQ } from "@/components/yacht/YachtFAQ";
 import { SimilarYachts } from "@/components/yacht/SimilarYachts";
 import { YachtCTA } from "@/components/yacht/YachtCTA";
 import { MobileBookingBar } from "@/components/yacht/MobileBookingBar";
+import { redirect } from "next/navigation";
 
-export const revalidate = 60; // Revalidate every 60 seconds to prevent stale database UUIDs and prices
+export const dynamic = 'force-dynamic'; // Prevent any stale caching for booking-critical pages
 
 import { yachtRepository } from "@/server/repositories/yacht.repository";
 import { BookingProvider } from "@/lib/contexts/BookingContext";
@@ -84,6 +85,11 @@ export default async function YachtDetailPage({ params }: { params: { slug: stri
 
   if (!yacht) {
     notFound();
+  }
+
+  // Enforce canonical slug routing
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.slug)) {
+    redirect(`/fleet/${yacht.slug}`);
   }
 
   return (
