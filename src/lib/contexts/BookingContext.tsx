@@ -5,6 +5,8 @@ import { availabilityService, DayAvailability, TimeSlot } from "@/services/avail
 import { getBookingQuoteAction } from "@/actions/pricing";
 import { QuoteResponse } from "@/server/services/pricing.service";
 
+import { getPublicAvailability } from "@/actions/availability";
+
 export interface Addon {
   title: string;
   price: number;
@@ -31,6 +33,12 @@ interface BookingState {
   holdToken: string | null;
   holdExpiresAt: Date | null;
   idempotencyKey: string;
+
+  actionResultType?: string;
+  actionResultIsNull?: string;
+  actionResultKeys?: string;
+  actionResultJson?: string;
+  clientError?: string;
 }
 
 interface BookingContextType extends BookingState {
@@ -72,12 +80,16 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
 
   const [holdToken, setHoldToken] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
-  // Generate once per load so refresh within same session might reuse it if we use sessionStorage, 
-  // but for now, simple random UUID per context mount is fine for strict idempotency against double-clicks.
   const [idempotencyKey] = useState<string>(() => crypto.randomUUID());
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const [actionResultType, setActionResultType] = useState<string>("none");
+  const [actionResultIsNull, setActionResultIsNull] = useState<string>("none");
+  const [actionResultKeys, setActionResultKeys] = useState<string>("none");
+  const [actionResultJson, setActionResultJson] = useState<string>("none");
+  const [clientError, setClientError] = useState<string>("none");
 
   // Load initial availability
   useEffect(() => {
@@ -99,10 +111,36 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
     if (!id || id === "1") return;
     setIsLoadingAvailability(true);
     try {
-      const data = await availabilityService.getAvailability(id, month, year);
+      // Call getPublicAvailability directly to inspect client-side runtime behavior
+      const data = await getPublicAvailability(id, month, year);
+      
+      setActionResultType(typeof data);
+      setActionResultIsNull(data === null ? "YES" : "NO");
+      if (data && typeof data === "object") {
+        setActionResultKeys(Object.keys(data).join(", "));
+        const safeJson: any = {};
+        for (const [k, v] of Object.entries(data)) {
+          if (k === "_debug" || k === "debug") {
+            safeJson[k] = v;
+          } else {
+            safeJson[k] = "DayAvailability";
+          }
+        }
+        setActionResultJson(JSON.stringify(safeJson));
+      } else {
+        setActionResultKeys("none");
+        setActionResultJson(String(data));
+      }
+
       setAvailableSlots(data || {});
-    } catch (e) {
-      console.error("Failed to fetch availability", e);
+    } catch (e: any) {
+      console.error("Direct fetchAvailability call threw error:", e);
+      setClientError(e?.message || String(e));
+      setActionResultType("error");
+      setActionResultIsNull("unknown");
+      setActionResultKeys("none");
+      setActionResultJson("error: " + (e?.message || String(e)));
+      setAvailableSlots({});
     } finally {
       setIsLoadingAvailability(false);
     }
@@ -240,7 +278,13 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
     isSuccess,
     submitBooking,
     resetBooking,
-    fetchAvailability
+    fetchAvailability,
+
+    actionResultType,
+    actionResultIsNull,
+    actionResultKeys,
+    actionResultJson,
+    clientError
   };
 
   return (

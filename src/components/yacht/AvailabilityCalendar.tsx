@@ -17,7 +17,10 @@ function getInitialChicagoDate() {
 }
 
 export function AvailabilityCalendar() {
-  const { yachtId, selectedDate, setSelectedDate, duration, availableSlots, isLoadingAvailability, fetchAvailability } = useBooking();
+  const { 
+    yachtId, selectedDate, setSelectedDate, duration, availableSlots, isLoadingAvailability, fetchAvailability,
+    actionResultType, actionResultIsNull, actionResultKeys, actionResultJson, clientError 
+  } = useBooking();
   const initial = getInitialChicagoDate();
   const [currentMonth, setCurrentMonth] = useState(initial.month);
   const [year, setYear] = useState(initial.year);
@@ -114,7 +117,7 @@ export function AvailabilityCalendar() {
       {/* TEMPORARY MINIMAL DEBUG UI FOR LIVE BROWSER VERIFICATION */}
       <div className="max-w-md mb-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-mono text-amber-900 space-y-1">
         <div className="font-bold text-amber-950 pb-1 border-b border-amber-200 mb-1">
-          LIVE_BUILD_MARKER: 5bfff9b-debug-v3
+          LIVE_BUILD_MARKER: 5bfff9b-debug-v4
         </div>
         <div>DEBUG yachtId: {yachtId || "EMPTY"}</div>
         <div>DEBUG raw keys: {rawKeys.join(", ") || "none"}</div>
@@ -122,6 +125,18 @@ export function AvailabilityCalendar() {
         <div>DEBUG available count: {availableCount}</div>
         <div>DEBUG displayed month: {monthLabel}</div>
         
+        <div className="pt-2 border-t border-amber-200 mt-2 space-y-1">
+          <div>ACTION RESULT TYPE: {actionResultType || "undefined"}</div>
+          <div>ACTION RESULT IS NULL: {actionResultIsNull || "undefined"}</div>
+          <div>ACTION RESULT KEYS: {actionResultKeys || "undefined"}</div>
+          <div>ACTION RESULT JSON: {actionResultJson || "undefined"}</div>
+          {clientError && clientError !== "none" && (
+            <div className="text-red-600 font-bold mt-1">
+              CLIENT ERROR: {clientError}
+            </div>
+          )}
+        </div>
+
         <div className="pt-2 border-t border-amber-200 mt-2 space-y-1">
           {debugInfo ? (
             <>
