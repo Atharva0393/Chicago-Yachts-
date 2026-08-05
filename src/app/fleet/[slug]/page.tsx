@@ -15,6 +15,8 @@ import { SimilarYachts } from "@/components/yacht/SimilarYachts";
 import { YachtCTA } from "@/components/yacht/YachtCTA";
 import { MobileBookingBar } from "@/components/yacht/MobileBookingBar";
 
+export const revalidate = 60; // Revalidate every 60 seconds to prevent stale database UUIDs and prices
+
 import { yachtRepository } from "@/server/repositories/yacht.repository";
 import { BookingProvider } from "@/lib/contexts/BookingContext";
 
