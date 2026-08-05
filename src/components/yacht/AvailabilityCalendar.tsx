@@ -3,10 +3,24 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useBooking } from "@/lib/contexts/BookingContext";
 
+function getInitialChicagoDate() {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: 'numeric', day: 'numeric' });
+  const parts = formatter.formatToParts(now);
+  let month = now.getMonth();
+  let year = now.getFullYear();
+  for (const p of parts) {
+    if (p.type === 'month') month = parseInt(p.value, 10) - 1;
+    if (p.type === 'year') year = parseInt(p.value, 10);
+  }
+  return { month, year };
+}
+
 export function AvailabilityCalendar() {
   const { yachtId, selectedDate, setSelectedDate, duration, availableSlots, isLoadingAvailability, fetchAvailability } = useBooking();
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [year, setYear] = useState(new Date().getFullYear());
+  const initial = getInitialChicagoDate();
+  const [currentMonth, setCurrentMonth] = useState(initial.month);
+  const [year, setYear] = useState(initial.year);
   
   const daysInMonth = new Date(year, currentMonth + 1, 0).getDate();
   const firstDay = new Date(year, currentMonth, 1).getDay();
@@ -44,9 +58,17 @@ export function AvailabilityCalendar() {
   const getStatus = (day: number) => {
     const dateStr = `${year}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     
-    // Check if day is in the past
+    // Check if day is in the past using Chicago timezone
     const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: 'numeric', day: 'numeric' });
+    const parts = formatter.formatToParts(now);
+    let cY = now.getFullYear(), cM = now.getMonth() + 1, cD = now.getDate();
+    for (const p of parts) {
+      if (p.type === 'year') cY = parseInt(p.value, 10);
+      if (p.type === 'month') cM = parseInt(p.value, 10);
+      if (p.type === 'day') cD = parseInt(p.value, 10);
+    }
+    const todayStr = `${cY}-${String(cM).padStart(2, '0')}-${String(cD).padStart(2, '0')}`;
     if (dateStr < todayStr) return 'booked';
 
     const dayData = availableSlots[dateStr];
@@ -77,10 +99,21 @@ export function AvailabilityCalendar() {
     }
   };
 
+  const availableCount = Object.values(availableSlots).filter(d => Object.values(d.slots).some(s => s === "available")).length;
+  const availKeys = Object.keys(availableSlots);
+
   return (
     <section className="py-10 border-b border-slate-100">
       <h2 className="text-2xl font-medium text-slate-900 tracking-tight mb-2">Availability</h2>
       <p className="text-slate-500 font-light mb-8">Minimum {duration}-hour charter duration required.</p>
+
+      {/* TEMPORARY MINIMAL DEBUG UI FOR LIVE BROWSER VERIFICATION */}
+      <div className="max-w-md mb-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl text-xs font-mono text-amber-900 space-y-1">
+        <div>DEBUG yachtId: {yachtId || "EMPTY"}</div>
+        <div>DEBUG availability keys: {availKeys.length} ({availKeys.slice(0, 3).join(", ") || "none"}...)</div>
+        <div>DEBUG available count: {availableCount}</div>
+        <div>DEBUG displayed month: {monthLabel}</div>
+      </div>
       
       <div className="max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
