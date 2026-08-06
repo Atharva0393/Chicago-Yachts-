@@ -136,18 +136,18 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
       }
 
       if (response.ok && res && res.success && res.data) {
-        const slotsObj = { ...res.data };
+        const slotsObj: any = { ...res.data };
         if (res.debug) {
-          (slotsObj as any)._debug = res.debug;
-          (slotsObj as any).debug = res.debug;
+          slotsObj._debug = res.debug;
+          slotsObj.debug = res.debug;
         }
         setAvailableSlots(slotsObj);
         setClientError("none");
       } else {
-        const slotsObj = {};
+        const slotsObj: any = {};
         if (res && res.debug) {
-          (slotsObj as any)._debug = res.debug;
-          (slotsObj as any).debug = res.debug;
+          slotsObj._debug = res.debug;
+          slotsObj.debug = res.debug;
         }
         setAvailableSlots(slotsObj);
         setClientError(`API Error (${res?.stage || "unknown"}): ` + (res?.error || response.statusText));
