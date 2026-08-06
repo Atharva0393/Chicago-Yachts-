@@ -11,7 +11,7 @@ export interface DayAvailability {
   };
 }
 
-import { getPublicAvailability } from "@/actions/availability";
+import { getPublicAvailability } from "@/actions/public-availability";
 
 class AvailabilityService {
   /**
@@ -19,7 +19,11 @@ class AvailabilityService {
    */
   async getAvailability(yachtId: string, month: number, year: number): Promise<Record<string, DayAvailability>> {
     try {
-      return await getPublicAvailability(yachtId, month, year);
+      const res = await getPublicAvailability(yachtId, month, year);
+      if (res && res.success && res.data) {
+        return res.data;
+      }
+      return {};
     } catch (e) {
       console.error("Failed to fetch availability from server", e);
       return {};

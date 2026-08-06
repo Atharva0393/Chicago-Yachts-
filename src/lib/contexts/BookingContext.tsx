@@ -4,8 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { availabilityService, DayAvailability, TimeSlot } from "@/services/availability.service";
 import { getBookingQuoteAction } from "@/actions/pricing";
 import { QuoteResponse } from "@/server/services/pricing.service";
-
-import { getPublicAvailability } from "@/actions/availability";
+import { getPublicAvailability } from "@/actions/public-availability";
 
 export interface Addon {
   title: string;
@@ -111,28 +110,39 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
     if (!id || id === "1") return;
     setIsLoadingAvailability(true);
     try {
-      // Call getPublicAvailability directly to inspect client-side runtime behavior
-      const data = await getPublicAvailability(id, month, year);
+      const res = await getPublicAvailability(id, month, year);
       
-      setActionResultType(typeof data);
-      setActionResultIsNull(data === null ? "YES" : "NO");
-      if (data && typeof data === "object") {
-        setActionResultKeys(Object.keys(data).join(", "));
-        const safeJson: any = {};
-        for (const [k, v] of Object.entries(data)) {
-          if (k === "_debug" || k === "debug") {
-            safeJson[k] = v;
-          } else {
-            safeJson[k] = "DayAvailability";
-          }
-        }
+      setActionResultType(typeof res);
+      setActionResultIsNull(res === null ? "YES" : "NO");
+      if (res && typeof res === "object") {
+        setActionResultKeys(Object.keys(res).join(", "));
+        const safeJson: any = {
+          success: res.success,
+          error: res.error,
+          debug: res.debug
+        };
         setActionResultJson(JSON.stringify(safeJson));
       } else {
         setActionResultKeys("none");
-        setActionResultJson(String(data));
+        setActionResultJson(String(res));
       }
 
-      setAvailableSlots(data || {});
+      if (res && res.success && res.data) {
+        const slotsObj = { ...res.data };
+        (slotsObj as any)._debug = res.debug;
+        (slotsObj as any).debug = res.debug;
+        setAvailableSlots(slotsObj);
+      } else {
+        const slotsObj = {};
+        if (res && res.debug) {
+          (slotsObj as any)._debug = res.debug;
+          (slotsObj as any).debug = res.debug;
+        }
+        setAvailableSlots(slotsObj);
+        if (res && res.error) {
+          setClientError("Server error: " + res.error);
+        }
+      }
     } catch (e: any) {
       console.error("Direct fetchAvailability call threw error:", e);
       setClientError(e?.message || String(e));

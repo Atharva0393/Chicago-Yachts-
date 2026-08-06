@@ -1,18 +1,18 @@
 "use server";
 
 import { serverPricingService, QuoteRequest, QuoteResponse } from "@/server/services/pricing.service";
-import { getPublicAvailability } from "@/actions/availability";
+import { getPublicAvailability } from "@/actions/public-availability";
 
 export async function getBookingQuoteAction(req: QuoteRequest): Promise<QuoteResponse> {
   try {
     const [year, month, day] = req.dateStr.split('-').map(Number);
 
-    // 1. Availability Cross-Validation
-    // The browser might send a request for a slot that was just booked.
-    // Fetch real-time availability from DB via the same engine used in Ticket 7.
-    const monthAvailability = await getPublicAvailability(req.yachtId, month - 1, year);
+    const monthAvailabilityResult = await getPublicAvailability(req.yachtId, month - 1, year);
+    if (!monthAvailabilityResult || !monthAvailabilityResult.success || !monthAvailabilityResult.data) {
+      return { status: "UNAVAILABLE" };
+    }
     
-    const dayData = monthAvailability[req.dateStr];
+    const dayData = monthAvailabilityResult.data[req.dateStr];
     if (!dayData) {
       return { status: "UNAVAILABLE" };
     }
