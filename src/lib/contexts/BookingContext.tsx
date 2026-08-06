@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { availabilityService, DayAvailability, TimeSlot } from "@/services/availability.service";
 import { getBookingQuoteAction } from "@/actions/pricing";
 import { QuoteResponse } from "@/server/services/pricing.service";
-import { getPublicAvailability } from "@/actions/public-availability";
+// getPublicAvailability Server Action is no longer imported here to avoid Vercel component errors.
 
 export interface Addon {
   title: string;
@@ -110,16 +110,24 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
     if (!id || id === "1") return;
     setIsLoadingAvailability(true);
     try {
-      const res = await getPublicAvailability(id, month, year);
+      const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const url = `/api/public/availability?yachtId=${id}&month=${monthStr}`;
       
-      setActionResultType(typeof res);
-      setActionResultIsNull(res === null ? "YES" : "NO");
+      const response = await fetch(url);
+      
+      setActionResultType(response.status.toString());
+      setActionResultIsNull("NO");
+      
+      const res = await response.json();
+      
       if (res && typeof res === "object") {
         setActionResultKeys(Object.keys(res).join(", "));
         const safeJson: any = {
           success: res.success,
           error: res.error,
-          debug: res.debug
+          stage: res.stage,
+          dates: res.dates,
+          slots: res.slots
         };
         setActionResultJson(JSON.stringify(safeJson));
       } else {
@@ -127,11 +135,14 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
         setActionResultJson(String(res));
       }
 
-      if (res && res.success && res.data) {
+      if (response.ok && res && res.success && res.data) {
         const slotsObj = { ...res.data };
-        (slotsObj as any)._debug = res.debug;
-        (slotsObj as any).debug = res.debug;
+        if (res.debug) {
+          (slotsObj as any)._debug = res.debug;
+          (slotsObj as any).debug = res.debug;
+        }
         setAvailableSlots(slotsObj);
+        setClientError("none");
       } else {
         const slotsObj = {};
         if (res && res.debug) {
@@ -139,9 +150,7 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
           (slotsObj as any).debug = res.debug;
         }
         setAvailableSlots(slotsObj);
-        if (res && res.error) {
-          setClientError("Server error: " + res.error);
-        }
+        setClientError(`API Error (${res?.stage || "unknown"}): ` + (res?.error || response.statusText));
       }
     } catch (e: any) {
       console.error("Direct fetchAvailability call threw error:", e);
