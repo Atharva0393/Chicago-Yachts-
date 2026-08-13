@@ -2,12 +2,7 @@
 
 import { db } from "@/lib/db";
 import { AvailabilityStatus, DayAvailability } from "@/services/availability.service";
-
-export const SLOT_TIMES = {
-  Morning: { startHour: 9, endHour: 13 },
-  Afternoon: { startHour: 14, endHour: 18 },
-  Evening: { startHour: 19, endHour: 23 },
-};
+import { SLOT_TIMES } from "@/lib/constants/slot-times";
 
 function buildDate(year: number | string, month: number | string, day: number | string) {
   const y = typeof year === "string" ? parseInt(year, 10) : Number(year);
