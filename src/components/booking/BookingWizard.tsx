@@ -359,6 +359,10 @@ export function BookingWizard({ yacht }: { yacht: any }) {
           </div>
         );
       case 5:
+        const quoteTotal = quote ? parseFloat(quote.totalAmount || "0") : 0;
+        const quoteDeposit = quoteTotal * 0.30;
+        const quoteRemaining = quoteTotal * 0.70;
+
         return (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
             <h2 className="text-3xl font-medium text-slate-900 tracking-tight mb-2">Review your quote</h2>
@@ -385,6 +389,31 @@ export function BookingWizard({ yacht }: { yacht: any }) {
                   <div className="font-medium text-slate-900">{timeSlot} ({duration} hrs)</div>
                 </div>
               </div>
+
+              {quote && (
+                <div className="p-6 border border-slate-200 bg-slate-50 rounded-2xl space-y-4">
+                  <div className="flex justify-between items-center text-lg font-semibold text-slate-900">
+                    <span>Booking Total</span>
+                    <span>${quoteTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+
+                  <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-base font-medium text-slate-900">
+                    <div>
+                      <div>30% Deposit Due Today</div>
+                      <div className="text-xs font-light text-slate-500">Locks in your reservation hold</div>
+                    </div>
+                    <span className="font-semibold text-slate-900">${quoteDeposit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+
+                  <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-sm text-slate-600">
+                    <div>
+                      <div className="font-medium text-slate-800">Remaining Balance (70%)</div>
+                      <div className="text-xs font-light text-slate-500">Due on your charter date</div>
+                    </div>
+                    <span className="font-semibold text-slate-900">${quoteRemaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
