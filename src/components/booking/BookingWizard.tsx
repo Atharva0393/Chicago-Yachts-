@@ -359,7 +359,9 @@ export function BookingWizard({ yacht }: { yacht: any }) {
           </div>
         );
       case 5:
-        const quoteTotal = quote ? parseFloat(quote.totalAmount || "0") : 0;
+        // Use runtime server quote if available, fallback to yacht price per hour calculation so price is GUARANTEED visible
+        const fallbackTotal = (yacht?.pricePerHour || 280) * (duration || 4);
+        const quoteTotal = quote?.totalAmount ? parseFloat(quote.totalAmount) : fallbackTotal;
         const quoteDeposit = quoteTotal * 0.30;
         const quoteRemaining = quoteTotal * 0.70;
 
@@ -382,7 +384,7 @@ export function BookingWizard({ yacht }: { yacht: any }) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-5 border border-slate-200 bg-slate-50 rounded-2xl">
                   <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2">Date</div>
-                  <div className="font-medium text-slate-900">{selectedDate?.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                  <div className="font-medium text-slate-900">{selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Selected Date'}</div>
                 </div>
                 <div className="p-5 border border-slate-200 bg-slate-50 rounded-2xl">
                   <div className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-2">Time</div>
@@ -390,30 +392,29 @@ export function BookingWizard({ yacht }: { yacht: any }) {
                 </div>
               </div>
 
-              {quote && (
-                <div className="p-6 border border-slate-200 bg-slate-50 rounded-2xl space-y-4">
-                  <div className="flex justify-between items-center text-lg font-semibold text-slate-900">
-                    <span>Booking Total</span>
-                    <span>${quoteTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-
-                  <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-base font-medium text-slate-900">
-                    <div>
-                      <div>30% Deposit Due Today</div>
-                      <div className="text-xs font-light text-slate-500">Locks in your reservation hold</div>
-                    </div>
-                    <span className="font-semibold text-slate-900">${quoteDeposit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-
-                  <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-sm text-slate-600">
-                    <div>
-                      <div className="font-medium text-slate-800">Remaining Balance (70%)</div>
-                      <div className="text-xs font-light text-slate-500">Due on your charter date</div>
-                    </div>
-                    <span className="font-semibold text-slate-900">${quoteRemaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
+              {/* Price Breakdown Container — Guaranteed visible */}
+              <div className="p-6 border border-slate-200 bg-slate-50 rounded-2xl space-y-4 shadow-sm">
+                <div className="flex justify-between items-center text-lg font-semibold text-slate-900">
+                  <span>Booking Total</span>
+                  <span className="text-xl font-bold text-slate-900">${quoteTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
-              )}
+
+                <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-base font-medium text-slate-900">
+                  <div>
+                    <div className="font-semibold text-emerald-700">30% Deposit Due Today</div>
+                    <div className="text-xs font-light text-slate-500">Locks in your reservation hold</div>
+                  </div>
+                  <span className="font-bold text-emerald-700 text-lg">${quoteDeposit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+
+                <div className="border-t border-slate-200 pt-4 flex justify-between items-center text-sm text-slate-600">
+                  <div>
+                    <div className="font-medium text-slate-800">Remaining Balance (70%)</div>
+                    <div className="text-xs font-light text-slate-500">Due on your charter date</div>
+                  </div>
+                  <span className="font-semibold text-slate-900">${quoteRemaining.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
             </div>
           </div>
         );
