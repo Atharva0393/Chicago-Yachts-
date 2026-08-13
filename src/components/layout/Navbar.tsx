@@ -34,6 +34,10 @@ export function Navbar({ className }: { className?: string }) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/crm") || pathname === "/login") {
+    return null
+  }
+
   return (
     <>
       <header className={cn("fixed top-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-[95%] max-w-7xl z-50 transition-all duration-500", className)}>

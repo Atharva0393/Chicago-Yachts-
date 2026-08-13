@@ -6,9 +6,13 @@ import { X, Scale } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
+import { usePathname } from "next/navigation"
+
 export function CompareDrawer() {
+  const pathname = usePathname()
   const { selectedYachts, removeYacht, clearCompare } = useCompare()
 
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/crm") || pathname === "/login") return null
   if (selectedYachts.length === 0) return null
 
   return (

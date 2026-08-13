@@ -1,4 +1,7 @@
+"use client"
+
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { companyInfo } from "@/lib/constants/company"
@@ -25,6 +28,12 @@ const Youtube = ({ className }: { className?: string }) => (
 )
 
 export function Footer({ className }: { className?: string }) {
+  const pathname = usePathname()
+
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/crm") || pathname === "/login") {
+    return null
+  }
+
   return (
     <footer className={cn("border-t border-border/40 bg-background pt-16 pb-8", className)}>
       <div className="container grid gap-12 md:grid-cols-4 lg:grid-cols-5 mb-16">
