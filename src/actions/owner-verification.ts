@@ -3,11 +3,37 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth-server";
 import { ownerVerificationService } from "@/server/services/owner-verification.service";
+import { inboundMessageRouter } from "@/server/services/messaging/inbound-router";
+import { mockWhatsAppProvider } from "@/server/services/messaging/mock-provider";
+import { db } from "@/lib/db";
 
 export async function createOwnerVerificationAction(bookingId: string) {
   try {
     await requireAdmin();
     const verification = await ownerVerificationService.createVerificationRequest(bookingId);
+    
+    // Auto-send mock outbound WhatsApp message
+    const fullVerif = await db.ownerVerification.findUnique({
+      where: { id: verification.id },
+      include: { booking: { include: { customer: true } }, yacht: { include: { ownerContacts: true } } }
+    });
+
+    if (fullVerif) {
+      const ownerName = fullVerif.yacht.ownerContacts[0]?.name || "Yacht Owner";
+      const ownerPhone = fullVerif.yacht.ownerContacts[0]?.phone || "+13125550199";
+
+      await mockWhatsAppProvider.sendVerificationRequest({
+        verificationId: fullVerif.id,
+        ownerName,
+        ownerPhone,
+        yachtName: fullVerif.yacht.name,
+        requestedDate: fullVerif.requestedDate,
+        requestedTimeSlot: fullVerif.requestedTimeSlot,
+        guestCount: fullVerif.booking.guestCount,
+        bookingRef: fullVerif.booking.bookingReference || fullVerif.booking.id
+      });
+    }
+
     revalidatePath("/admin");
     revalidatePath("/admin/bookings");
     return { success: true, verification };
@@ -59,5 +85,44 @@ export async function findAlternativeYachtsAction(excludeYachtId: string, dateIs
     return { success: true, alternatives };
   } catch (err: any) {
     return { success: false, error: err.message || "Failed to find alternative yachts" };
+  }
+}
+
+/**
+ * Simulates an incoming WhatsApp owner message through the full inbound router pipeline.
+ */
+export async function simulateOwnerResponseAction(
+  verificationId: string,
+  simulatedMessage: string,
+  senderPhone?: string,
+  providerMessageId?: string
+) {
+  try {
+    await requireAdmin();
+    const result = await inboundMessageRouter.processInboundMessage({
+      verificationId,
+      messageBody: simulatedMessage,
+      senderPhone,
+      providerMessageId
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/bookings");
+    return { success: true, result };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to process simulated owner response" };
+  }
+}
+
+/**
+ * Fetches the message timeline for a verification request.
+ */
+export async function getMessageTimelineAction(verificationId: string) {
+  try {
+    await requireAdmin();
+    const messages = await inboundMessageRouter.getMessageTimeline(verificationId);
+    return { success: true, messages };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to fetch message timeline" };
   }
 }

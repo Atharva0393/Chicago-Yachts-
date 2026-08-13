@@ -164,6 +164,7 @@ model Yacht {
   bookingHolds BookingHold[]
   reviews      Review[]
   ownerVerifications OwnerVerification[]
+  ownerContacts      OwnerContact[]
 
   // Timestamps & Soft Delete
   createdAt DateTime  @default(now())
@@ -594,10 +595,60 @@ model OwnerVerification {
   status VerificationStatus @default(PENDING)
   notes  String?            @db.Text
 
+  messages VerificationMessage[]
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   respondedAt DateTime?
 
   @@index([bookingId])
   @@index([yachtId, status])
+}
+
+model OwnerContact {
+  id        String  @id @default(uuid())
+  name      String
+  phone     String  @unique // e.g. +13125550199
+  isActive  Boolean @default(true)
+
+  yachtId   String
+  yacht     Yacht   @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([yachtId])
+  @@index([phone])
+}
+
+enum MessageDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum MessageProvider {
+  MOCK_WHATSAPP
+  WHATSAPP_BUSINESS
+}
+
+model VerificationMessage {
+  id                String            @id @default(uuid())
+  verificationId    String
+  verification      OwnerVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+
+  providerMessageId String?           @unique
+  direction         MessageDirection
+  provider          MessageProvider   @default(MOCK_WHATSAPP)
+  body              String            @db.Text
+  senderPhone       String?
+  recipientPhone    String?
+  decision          String?           // AVAILABLE, UNAVAILABLE, NEEDS_CLARIFICATION, UNKNOWN
+  processingStatus  String            @default("PROCESSED") // PENDING, PROCESSED, FAILED, IGNORED
+
+  createdAt         DateTime          @default(now())
+  processedAt       DateTime?
+  error             String?
+
+  @@index([verificationId])
+  @@index([providerMessageId])
 }
