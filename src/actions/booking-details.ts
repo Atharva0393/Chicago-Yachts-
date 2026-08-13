@@ -24,10 +24,14 @@ export async function getBookingDetailed(id: string) {
 
     const activities = await bookingLifecycleService.getBookingAuditTrail(id);
 
+    // Convert Prisma Decimal objects & Dates to plain JS primitives for RSC Server Action serialization
+    const serializedBooking = JSON.parse(JSON.stringify(booking));
+    const serializedActivities = JSON.parse(JSON.stringify(activities));
+
     return { 
       success: true, 
-      booking,
-      activities
+      booking: serializedBooking,
+      activities: serializedActivities
     };
   } catch (e: any) {
     return { success: false, error: e.message };

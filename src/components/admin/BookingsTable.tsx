@@ -195,7 +195,7 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
                     <div className="text-xs text-slate-500 mt-1">{booking.timeSlot}</div>
                   </td>
                   <td className="px-6 py-4 font-medium text-slate-900">
-                    ${booking.totalPrice.toLocaleString()}
+                    ${(Number(booking.totalPrice ?? (booking as any).totalAmount ?? 0)).toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1.5">

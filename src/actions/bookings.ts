@@ -13,7 +13,7 @@ export async function updateBookingStatus(id: string, status: BookingStatus) {
     revalidatePath("/admin/bookings")
     revalidatePath("/admin") // For dashboard metrics
     revalidatePath("/admin/calendar")
-    return { success: true, booking }
+    return { success: true, booking: JSON.parse(JSON.stringify(booking)) }
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to update booking status" }
   }
@@ -27,7 +27,7 @@ export async function cancelBooking(id: string, reason: string) {
     revalidatePath("/admin/bookings")
     revalidatePath("/admin")
     revalidatePath("/admin/calendar")
-    return { success: true, booking }
+    return { success: true, booking: JSON.parse(JSON.stringify(booking)) }
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to cancel booking" }
   }
@@ -39,7 +39,7 @@ export async function addBookingNote(id: string, content: string) {
     const adminId = (session.user as any)?.id || "admin";
     const note = await bookingLifecycleService.addBookingNote(id, content, adminId)
     revalidatePath("/admin/bookings")
-    return { success: true, note }
+    return { success: true, note: JSON.parse(JSON.stringify(note)) }
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to add booking note" }
   }
