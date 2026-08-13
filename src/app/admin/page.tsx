@@ -16,9 +16,16 @@ import {
 import Image from "next/image"
 import { toZonedTime, format } from "date-fns-tz"
 
+import Link from "next/link"
+import { requireAdmin } from "@/lib/auth-server"
+
 export default async function AdminDashboard() {
+  await requireAdmin();
+
   const yachts = await db.yacht.findMany();
-  const bookings = await db.booking.findMany();
+  const bookings = await db.booking.findMany({
+    include: { yacht: true, customer: true }
+  });
   
   // Calculate dynamic metrics
   const totalRevenue = bookings.reduce((sum: number, b: any) => sum + (b.bookingStatus !== "CANCELLED" ? Number(b.totalAmount) : 0), 0);
@@ -37,10 +44,17 @@ export default async function AdminDashboard() {
   const activeYachts = yachts.filter((y: any) => y.isActive).length;
   const fleetAvailability = yachts.length > 0 ? Math.round((activeYachts / yachts.length) * 100) : 0;
 
+  // Bookings requiring attention (Pending Confirmation or Overdue)
+  const pendingConfirmationBookings = bookings.filter((b: any) => b.bookingStatus === "PENDING");
+  const upcomingBookings = bookings
+    .filter((b: any) => b.bookingStatus !== "CANCELLED" && b.bookingStatus !== "EXPIRED" && new Date(b.startDateTime) >= new Date())
+    .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
+    .slice(0, 5);
+
   const recentBookings = await db.booking.findMany({
     take: 3,
     orderBy: { createdAt: 'desc' },
-    include: { yacht: true }
+    include: { yacht: true, customer: true }
   });
 
   // Fetch New Leads
@@ -156,6 +170,31 @@ export default async function AdminDashboard() {
 
       </div>
 
+      {/* Needs Your Attention Section */}
+      {pendingConfirmationBookings.length > 0 && (
+        <div className="mb-8 p-5 bg-amber-50/80 border border-amber-200 rounded-2xl flex items-center justify-between shadow-sm animate-in fade-in duration-300">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">
+              !
+            </div>
+            <div>
+              <h3 className="font-semibold text-amber-900 text-base">
+                Needs Your Attention: {pendingConfirmationBookings.length} Pending Reservation{pendingConfirmationBookings.length > 1 ? 's' : ''}
+              </h3>
+              <p className="text-sm text-amber-700">
+                You have bookings waiting for owner confirmation. Review customer details and confirm availability.
+              </p>
+            </div>
+          </div>
+          <Link 
+            href="/admin/bookings"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm rounded-xl transition-colors shrink-0"
+          >
+            Review Bookings
+          </Link>
+        </div>
+      )}
+
       {/* Middle Row: Analytics & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         
@@ -217,6 +256,67 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
+      </div>
+
+      {/* Upcoming Bookings Section */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="font-semibold text-slate-900 text-lg">Upcoming Charters</h3>
+            <p className="text-xs text-slate-500 font-light">Sorted by nearest charter departure date</p>
+          </div>
+          <Link href="/admin/bookings" className="text-xs text-primary font-semibold hover:underline">
+            View All Bookings
+          </Link>
+        </div>
+
+        {upcomingBookings.length === 0 ? (
+          <div className="text-sm text-slate-500 text-center py-8">
+            No upcoming charters scheduled.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-600">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-900 text-xs uppercase tracking-wider font-semibold">
+                <tr>
+                  <th className="px-4 py-3">Charter Date</th>
+                  <th className="px-4 py-3">Yacht</th>
+                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Guests</th>
+                  <th className="px-4 py-3">Total</th>
+                  <th className="px-4 py-3">Deposit</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {upcomingBookings.map((b: any) => (
+                  <tr key={b.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      {new Date(b.startDateTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </td>
+                    <td className="px-4 py-3 font-medium text-slate-900">{b.yacht.name}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-slate-900">{b.customer.firstName} {b.customer.lastName}</div>
+                      <div className="text-xs text-slate-500">{b.customer.email}</div>
+                    </td>
+                    <td className="px-4 py-3">{b.guestCount} Guests</td>
+                    <td className="px-4 py-3 font-medium text-slate-900">${Number(b.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="px-4 py-3 font-medium text-emerald-700">${Number(b.depositAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        b.bookingStatus === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-800' :
+                        b.bookingStatus === 'PENDING' ? 'bg-amber-100 text-amber-800' :
+                        'bg-slate-100 text-slate-800'
+                      }`}>
+                        {b.bookingStatus}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Bottom Row: Popular Yachts & CRM */}

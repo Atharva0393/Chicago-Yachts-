@@ -1,12 +1,16 @@
 import { bookingRepository } from "@/server/repositories/booking.repository"
 import { BookingsTable } from "@/components/admin/BookingsTable"
 
+import { requireAdmin } from "@/lib/auth-server"
+
 export default async function BookingsPage() {
-  const bookings = await bookingRepository.getAllBookings()
+  await requireAdmin();
+  const bookings = await bookingRepository.getAllBookings();
   
   // Map Prisma models to the UI types expected by BookingsTable
   const mappedBookings = bookings.map(b => ({
     id: b.id,
+    bookingReference: b.bookingReference,
     customer: `${b.customer.firstName} ${b.customer.lastName}`,
     email: b.customer.email,
     yacht: b.yacht.name,
@@ -14,7 +18,8 @@ export default async function BookingsPage() {
     timeSlot: "CUSTOM",
     guests: b.guestCount,
     totalAmount: Number(b.totalAmount),
-    remainingAmount: Number(b.remainingAmount),
+    depositAmount: Number(b.depositAmount || 0),
+    remainingAmount: Number(b.remainingAmount || 0),
     status: b.bookingStatus as any,
     paymentStatus: b.paymentStatus,
     createdAt: b.createdAt.toISOString()

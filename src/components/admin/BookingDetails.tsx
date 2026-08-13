@@ -148,7 +148,7 @@ export function BookingDetails({ booking: initialBooking, onUpdateStatus, isLoad
       <div className="p-6 bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-mono text-slate-500 uppercase tracking-wider">Booking {booking.id}</span>
+            <span className="text-xs font-mono font-semibold text-slate-700 uppercase tracking-wider">Reference: {booking.bookingReference || booking.id}</span>
             <div className="flex items-center gap-3">
               <h3 className="text-xl font-semibold text-slate-900">{booking.customer?.name}</h3>
               {getStatusBadge(booking.status)}

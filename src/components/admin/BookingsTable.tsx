@@ -82,13 +82,14 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
         }
       }
 
-      // 2. Search Filter (ID, Customer Name, Customer Email)
+      // 2. Search Filter (ID, Booking Reference, Yacht Name, Customer Name, Customer Email)
       if (searchQuery.trim() !== "") {
         const query = searchQuery.toLowerCase();
-        const matchesId = booking.id.toLowerCase().includes(query);
-        const matchesName = booking.customer?.name.toLowerCase().includes(query);
-        const matchesEmail = booking.customer?.email.toLowerCase().includes(query);
-        if (!matchesId && !matchesName && !matchesEmail) return false;
+        const matchesId = booking.id.toLowerCase().includes(query) || (booking as any).bookingReference?.toLowerCase().includes(query);
+        const matchesYacht = booking.yacht?.name?.toLowerCase().includes(query);
+        const matchesName = booking.customer?.name?.toLowerCase().includes(query);
+        const matchesEmail = booking.customer?.email?.toLowerCase().includes(query);
+        if (!matchesId && !matchesYacht && !matchesName && !matchesEmail) return false;
       }
       
       return true
@@ -177,7 +178,8 @@ export function BookingsTable({ initialBookings }: { initialBookings: Booking[] 
               {filteredBookings.map(booking => (
                 <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-mono text-xs font-medium text-slate-500">{booking.id}</div>
+                    <div className="font-mono text-xs font-semibold text-slate-900">{(booking as any).bookingReference || booking.id}</div>
+                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">{booking.id}</div>
                     <div className="text-xs text-slate-400 mt-1">{new Date(booking.createdAt).toLocaleDateString()}</div>
                   </td>
                   <td className="px-6 py-4">
