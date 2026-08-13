@@ -224,10 +224,11 @@ export class OwnerVerificationService {
     return alternativeYachts;
   }
 
-  /**
-   * Gets pending owner verification requests.
-   */
   async getPendingVerifications() {
+    if (!db.ownerVerification) {
+      console.warn("db.ownerVerification model not found on current Prisma Client instance");
+      return [];
+    }
     return await db.ownerVerification.findMany({
       where: { status: "PENDING" },
       include: {
@@ -237,7 +238,8 @@ export class OwnerVerificationService {
             yacht: true
           }
         },
-        yacht: true
+        yacht: true,
+        messages: true
       },
       orderBy: { createdAt: "desc" }
     });
