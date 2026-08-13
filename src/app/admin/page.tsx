@@ -18,6 +18,8 @@ import { toZonedTime, format } from "date-fns-tz"
 
 import Link from "next/link"
 import { requireAdmin } from "@/lib/auth-server"
+import { ownerVerificationService } from "@/server/services/owner-verification.service"
+import { OwnerVerificationList } from "@/components/admin/OwnerVerificationList"
 
 export default async function AdminDashboard() {
   await requireAdmin();
@@ -46,6 +48,7 @@ export default async function AdminDashboard() {
 
   // Bookings requiring attention (Pending Confirmation or Overdue)
   const pendingConfirmationBookings = bookings.filter((b: any) => b.bookingStatus === "PENDING");
+  const pendingVerifications = await ownerVerificationService.getPendingVerifications();
   const upcomingBookings = bookings
     .filter((b: any) => b.bookingStatus !== "CANCELLED" && b.bookingStatus !== "EXPIRED" && new Date(b.startDateTime) >= new Date())
     .sort((a: any, b: any) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime())
@@ -170,30 +173,13 @@ export default async function AdminDashboard() {
 
       </div>
 
-      {/* Needs Your Attention Section */}
-      {pendingConfirmationBookings.length > 0 && (
-        <div className="mb-8 p-5 bg-amber-50/80 border border-amber-200 rounded-2xl flex items-center justify-between shadow-sm animate-in fade-in duration-300">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">
-              !
-            </div>
-            <div>
-              <h3 className="font-semibold text-amber-900 text-base">
-                Needs Your Attention: {pendingConfirmationBookings.length} Pending Reservation{pendingConfirmationBookings.length > 1 ? 's' : ''}
-              </h3>
-              <p className="text-sm text-amber-700">
-                You have bookings waiting for owner confirmation. Review customer details and confirm availability.
-              </p>
-            </div>
-          </div>
-          <Link 
-            href="/admin/bookings"
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm rounded-xl transition-colors shrink-0"
-          >
-            Review Bookings
-          </Link>
-        </div>
-      )}
+      {/* Owner Availability Verification Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+          <Clock className="h-5 w-5 text-amber-500" /> Owner Availability Verifications
+        </h3>
+        <OwnerVerificationList initialVerifications={pendingVerifications as any} />
+      </div>
 
       {/* Middle Row: Analytics & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

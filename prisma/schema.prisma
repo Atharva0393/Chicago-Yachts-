@@ -104,6 +104,17 @@ enum ActivityType {
   EMAIL_SENT
   STATUS_CHANGED
   BOOKING_COMPLETED
+  OWNER_AVAILABILITY_REQUESTED
+  OWNER_AVAILABILITY_CONFIRMED
+  OWNER_AVAILABILITY_DECLINED
+}
+
+enum VerificationStatus {
+  PENDING
+  AVAILABLE
+  UNAVAILABLE
+  EXPIRED
+  CANCELLED
 }
 
 enum ConversationChannel {
@@ -152,6 +163,7 @@ model Yacht {
   bookings     Booking[]
   bookingHolds BookingHold[]
   reviews      Review[]
+  ownerVerifications OwnerVerification[]
 
   // Timestamps & Soft Delete
   createdAt DateTime  @default(now())
@@ -349,6 +361,7 @@ model Booking {
   addOns    BookingAddOn[]
   payments  PaymentTransaction[]
   notifications Notification[]
+  ownerVerifications OwnerVerification[]
 
   // Timestamps
   createdAt   DateTime  @default(now())
@@ -564,4 +577,27 @@ model Review {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+}
+
+model OwnerVerification {
+  id String @id @default(uuid())
+
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  yachtId String
+  yacht   Yacht @relation(fields: [yachtId], references: [id], onDelete: Cascade)
+
+  requestedDate     DateTime @db.Date
+  requestedTimeSlot String
+
+  status VerificationStatus @default(PENDING)
+  notes  String?            @db.Text
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  respondedAt DateTime?
+
+  @@index([bookingId])
+  @@index([yachtId, status])
 }
