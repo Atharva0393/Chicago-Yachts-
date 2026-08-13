@@ -17,6 +17,10 @@ export type GuestCheckoutFormData = z.infer<typeof guestCheckoutSchema>;
 
 export async function getCheckoutHoldAction(holdToken: string) {
   try {
+    if (!holdToken) {
+      return { status: "INVALID", message: "Hold token missing" };
+    }
+
     const hold = await db.bookingHold.findUnique({
       where: { id: holdToken },
       include: {
@@ -83,6 +87,10 @@ export async function saveCheckoutGuestAction(holdToken: string, data: GuestChec
     }
 
     // 2. Fetch Active Hold
+    if (!holdToken) {
+      return { status: "INVALID", message: "Hold token missing" };
+    }
+
     const hold = await db.bookingHold.findUnique({
       where: { id: holdToken },
       include: { yacht: true }
