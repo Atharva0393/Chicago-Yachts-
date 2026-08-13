@@ -4,8 +4,9 @@ import { AdminAvailabilityCalendar } from "@/components/admin/AdminAvailabilityC
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export default async function YachtAvailabilityPage({ params }: { params: { id: string } }) {
-  const yacht = await yachtRepository.getYachtById(params.id);
+export default async function YachtAvailabilityPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+  const resolvedParams = await params;
+  const yacht = await yachtRepository.getYachtById(resolvedParams.id);
 
   if (!yacht) {
     notFound();
