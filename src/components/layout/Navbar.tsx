@@ -34,7 +34,13 @@ export function Navbar({ className }: { className?: string }) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/crm") || pathname === "/login") {
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/crm") ||
+    pathname?.startsWith("/book") ||
+    pathname?.startsWith("/booking") ||
+    pathname === "/login"
+  ) {
     return null
   }
 

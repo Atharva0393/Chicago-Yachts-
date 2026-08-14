@@ -30,7 +30,13 @@ const Youtube = ({ className }: { className?: string }) => (
 export function Footer({ className }: { className?: string }) {
   const pathname = usePathname()
 
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/crm") || pathname === "/login") {
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/crm") ||
+    pathname?.startsWith("/book") ||
+    pathname?.startsWith("/booking") ||
+    pathname === "/login"
+  ) {
     return null
   }
 

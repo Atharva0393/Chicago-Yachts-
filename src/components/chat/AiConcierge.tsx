@@ -43,7 +43,13 @@ export function AiConcierge() {
     if (isOpen) scrollToBottom()
   }, [messages, isOpen, isTyping])
 
-  if (pathname.startsWith("/admin") || pathname.startsWith("/login")) return null;
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/crm") ||
+    pathname?.startsWith("/book") ||
+    pathname?.startsWith("/booking") ||
+    pathname === "/login"
+  ) return null;
 
   const handleSendMessage = (text: string) => {
     if (!text.trim()) return
