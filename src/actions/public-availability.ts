@@ -38,24 +38,6 @@ export async function getPublicAvailability(yachtId: string, month: number, year
 
     if (!yachtId) return { success: false, data: {}, error: "Yacht ID is empty" };
 
-    let dbHost = "unknown";
-    try {
-      const dbUrl = process.env.DATABASE_URL || "";
-      const match = dbUrl.match(/@([^:\/]+)/);
-      if (match && match[1]) {
-        dbHost = match[1];
-      } else if (dbUrl) {
-        dbHost = dbUrl.substring(0, 20) + "...";
-      }
-    } catch (e) {}
-
-    // Raw PostgreSQL queries inside Vercel server action runtime
-    const yachtCount = await db.yacht.count({ where: { id: yachtId } });
-    const rawAvailabilityCount = await db.availability.count({ where: { yachtId } });
-    const rawTimeSlotCount = await db.timeSlot.count({
-      where: { availability: { yachtId } }
-    });
-
     const startDate = buildDate(numYear, numMonth, 1);
     const endDate = buildDate(numYear, numMonth + 1, 0); // Last day of month
     const chicagoTodayUTC = getChicagoTodayUTC();
@@ -138,46 +120,15 @@ export async function getPublicAvailability(yachtId: string, month: number, year
       };
     }
 
-    const debugInfo = {
-      yachtId,
-      yachtExists: yachtCount > 0,
-      rawYachtCount: yachtCount,
-      availabilityRowCount: rawAvailabilityCount,
-      timeSlotRowCount: rawTimeSlotCount,
-      filteredAvailabilityCount: availabilities.length,
-      filteredTimeSlotCount,
-      requestedStart: startDate.toISOString(),
-      requestedEnd: endDate.toISOString(),
-      databaseHostFingerprint: dbHost,
-      serverTime: new Date().toISOString(),
-      error: null
-    };
-
     return {
       success: true,
-      data,
-      debug: debugInfo
+      data
     };
   } catch (error: any) {
     console.error("Failed to get public availability:", error);
-    const errDebug = {
-      yachtId,
-      yachtExists: false,
-      rawYachtCount: 0,
-      availabilityRowCount: 0,
-      timeSlotRowCount: 0,
-      filteredAvailabilityCount: 0,
-      filteredTimeSlotCount: 0,
-      requestedStart: "",
-      requestedEnd: "",
-      databaseHostFingerprint: "error",
-      serverTime: new Date().toISOString(),
-      error: error?.message || String(error)
-    };
     return {
       success: false,
       data: {},
-      debug: errDebug,
       error: error?.message || String(error)
     };
   }

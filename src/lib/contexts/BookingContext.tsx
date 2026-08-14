@@ -32,12 +32,6 @@ interface BookingState {
   holdToken: string | null;
   holdExpiresAt: Date | null;
   idempotencyKey: string;
-
-  actionResultType?: string;
-  actionResultIsNull?: string;
-  actionResultKeys?: string;
-  actionResultJson?: string;
-  clientError?: string;
 }
 
 interface BookingContextType extends BookingState {
@@ -84,12 +78,6 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [actionResultType, setActionResultType] = useState<string>("none");
-  const [actionResultIsNull, setActionResultIsNull] = useState<string>("none");
-  const [actionResultKeys, setActionResultKeys] = useState<string>("none");
-  const [actionResultJson, setActionResultJson] = useState<string>("none");
-  const [clientError, setClientError] = useState<string>("none");
-
   // Load initial availability
   useEffect(() => {
     if (!yachtId || yachtId === "1") return;
@@ -114,51 +102,15 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
       const url = `/api/public/availability?yachtId=${id}&month=${monthStr}`;
       
       const response = await fetch(url);
-      
-      setActionResultType(response.status.toString());
-      setActionResultIsNull("NO");
-      
       const res = await response.json();
       
-      if (res && typeof res === "object") {
-        setActionResultKeys(Object.keys(res).join(", "));
-        const safeJson: any = {
-          success: res.success,
-          error: res.error,
-          stage: res.stage,
-          dates: res.dates,
-          slots: res.slots
-        };
-        setActionResultJson(JSON.stringify(safeJson));
-      } else {
-        setActionResultKeys("none");
-        setActionResultJson(String(res));
-      }
-
       if (response.ok && res && res.success && res.data) {
-        const slotsObj: any = { ...res.data };
-        if (res.debug) {
-          slotsObj._debug = res.debug;
-          slotsObj.debug = res.debug;
-        }
-        setAvailableSlots(slotsObj);
-        setClientError("none");
+        setAvailableSlots(res.data);
       } else {
-        const slotsObj: any = {};
-        if (res && res.debug) {
-          slotsObj._debug = res.debug;
-          slotsObj.debug = res.debug;
-        }
-        setAvailableSlots(slotsObj);
-        setClientError(`API Error (${res?.stage || "unknown"}): ` + (res?.error || response.statusText));
+        setAvailableSlots({});
       }
     } catch (e: any) {
-      console.error("Direct fetchAvailability call threw error:", e);
-      setClientError(e?.message || String(e));
-      setActionResultType("error");
-      setActionResultIsNull("unknown");
-      setActionResultKeys("none");
-      setActionResultJson("error: " + (e?.message || String(e)));
+      console.error("fetchAvailability error:", e);
       setAvailableSlots({});
     } finally {
       setIsLoadingAvailability(false);
@@ -297,13 +249,7 @@ export function BookingProvider({ children, initialMaxGuests = 12, yachtId = "1"
     isSuccess,
     submitBooking,
     resetBooking,
-    fetchAvailability,
-
-    actionResultType,
-    actionResultIsNull,
-    actionResultKeys,
-    actionResultJson,
-    clientError
+    fetchAvailability
   };
 
   return (
