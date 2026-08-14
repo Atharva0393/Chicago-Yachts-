@@ -41,54 +41,56 @@ export function Footer({ className }: { className?: string }) {
   }
 
   return (
-    <footer className={cn("border-t border-border/40 bg-background pt-16 pb-8", className)}>
-      <div className="container grid gap-12 md:grid-cols-4 lg:grid-cols-5 mb-16">
-        <div className="lg:col-span-2">
-          <h3 className="font-semibold text-lg tracking-[0.15em] uppercase mb-6">{companyInfo.name}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-6">
-            {companyInfo.description}
-          </p>
-          <div className="flex gap-4">
-            <a href={companyInfo.socials.instagram} className="text-muted-foreground hover:text-primary transition-colors">
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a href={companyInfo.socials.facebook} className="text-muted-foreground hover:text-primary transition-colors">
-              <Facebook className="h-5 w-5" />
-            </a>
-            <a href={companyInfo.socials.youtube} className="text-muted-foreground hover:text-primary transition-colors">
-              <Youtube className="h-5 w-5" />
-            </a>
+    <footer className={cn("border-t border-border/40 bg-background pt-16 pb-8 w-full", className)}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 mb-16">
+          <div className="lg:col-span-2">
+            <h3 className="font-semibold text-lg tracking-[0.15em] uppercase mb-6">{companyInfo.name}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-6">
+              {companyInfo.description}
+            </p>
+            <div className="flex gap-4">
+              <a href={companyInfo.socials.instagram} className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a href={companyInfo.socials.facebook} className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href={companyInfo.socials.youtube} className="text-muted-foreground hover:text-primary transition-colors" aria-label="YouTube">
+                <Youtube className="h-5 w-5" />
+              </a>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-medium tracking-wide mb-6">Company</h4>
+            <ul className="space-y-4 text-sm text-muted-foreground">
+              <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link href="/fleet" className="hover:text-primary transition-colors">Our Fleet</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium tracking-wide mb-6">Legal</h4>
+            <ul className="space-y-4 text-sm text-muted-foreground">
+              <li><Link href={companyInfo.policies.terms} className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href={companyInfo.policies.privacy} className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href={companyInfo.policies.cancellation} className="hover:text-primary transition-colors">Cancellation Policy</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium tracking-wide mb-6">Contact</h4>
+            <ul className="space-y-4 text-sm text-muted-foreground">
+              <li><a href={`mailto:${companyInfo.email}`} className="hover:text-primary transition-colors">{companyInfo.email}</a></li>
+              <li><a href={`tel:${companyInfo.phone.replace(/[^0-9+]/g, '')}`} className="hover:text-primary transition-colors">{companyInfo.phone}</a></li>
+            </ul>
           </div>
         </div>
-        <div>
-          <h4 className="font-medium tracking-wide mb-6">Company</h4>
-          <ul className="space-y-4 text-sm text-muted-foreground">
-            <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
-            <li><Link href="/fleet" className="hover:text-primary transition-colors">Our Fleet</Link></li>
-            <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-medium tracking-wide mb-6">Legal</h4>
-          <ul className="space-y-4 text-sm text-muted-foreground">
-            <li><Link href={companyInfo.policies.terms} className="hover:text-primary transition-colors">Terms of Service</Link></li>
-            <li><Link href={companyInfo.policies.privacy} className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-            <li><Link href={companyInfo.policies.cancellation} className="hover:text-primary transition-colors">Cancellation Policy</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-medium tracking-wide mb-6">Contact</h4>
-          <ul className="space-y-4 text-sm text-muted-foreground">
-            <li><a href={`mailto:${companyInfo.email}`} className="hover:text-primary transition-colors">{companyInfo.email}</a></li>
-            <li><a href={`tel:${companyInfo.phone.replace(/[^0-9+]/g, '')}`} className="hover:text-primary transition-colors">{companyInfo.phone}</a></li>
-          </ul>
-        </div>
-      </div>
-      <div className="container border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} {companyInfo.name}. All rights reserved.</p>
-        <div className="flex gap-4">
-          <Link href={companyInfo.policies.terms} className="hover:text-primary transition-colors">Terms</Link>
-          <Link href={companyInfo.policies.privacy} className="hover:text-primary transition-colors">Privacy</Link>
+        <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} {companyInfo.name}. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href={companyInfo.policies.terms} className="hover:text-primary transition-colors">Terms</Link>
+            <Link href={companyInfo.policies.privacy} className="hover:text-primary transition-colors">Privacy</Link>
+          </div>
         </div>
       </div>
     </footer>
