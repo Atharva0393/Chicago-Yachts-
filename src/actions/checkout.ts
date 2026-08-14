@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 
 // Zod Schema for Guest Information Validation
-export const guestCheckoutSchema = z.object({
+const guestCheckoutSchema = z.object({
   firstName: z.string().trim().min(2, "First name is too short").max(50, "First name is too long"),
   lastName: z.string().trim().min(2, "Last name is too short").max(50, "Last name is too long"),
   email: z.string().trim().email("Invalid email address"),

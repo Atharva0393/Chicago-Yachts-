@@ -128,14 +128,23 @@ export const bookingHoldService = {
         // but Prisma doesn't support SELECT FOR UPDATE well.
         // Instead, we use optimistic concurrency via conditional update:
 
+        const firstSlot = availability.timeSlots.find(s => s.id === targetSlotIds[0])!;
+        const lastSlot = availability.timeSlots.find(s => s.id === targetSlotIds[targetSlotIds.length - 1])!;
+
+        const holdStartDateTime = new Date(targetDate);
+        holdStartDateTime.setUTCHours(firstSlot.startTime.getUTCHours(), firstSlot.startTime.getUTCMinutes(), 0, 0);
+
+        const holdEndDateTime = new Date(targetDate);
+        holdEndDateTime.setUTCHours(lastSlot.endTime.getUTCHours(), lastSlot.endTime.getUTCMinutes(), 0, 0);
+
         // Create hold record
         const newHold = await tx.bookingHold.create({
           data: {
             id: holdId,
             idempotencyKey: req.idempotencyKey,
             customerRef: "guest", // Could be session ID in future
-            startDateTime: availability.timeSlots.find(s => s.id === targetSlotIds[0])!.startTime,
-            endDateTime: availability.timeSlots.find(s => s.id === targetSlotIds[targetSlotIds.length - 1])!.endTime,
+            startDateTime: holdStartDateTime,
+            endDateTime: holdEndDateTime,
             expiresAt,
             status: "ACTIVE",
             subtotal: new Prisma.Decimal(quoteRes.quote!.subtotal),

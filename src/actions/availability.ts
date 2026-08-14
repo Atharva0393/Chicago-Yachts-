@@ -3,19 +3,7 @@
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-server";
 import { AvailabilityStatus, DayAvailability } from "@/services/availability.service";
-
-/**
- * TODO: CLIENT CONFIRMATION REQUIRED
- * These time slots (9 AM–1 PM, 2 PM–6 PM, 7 PM–11 PM) are TEMPORARY DEVELOPMENT DEFAULTS.
- * They have NOT been verified as actual business rules by Chicago Yachts.
- * They exist solely to facilitate MVP booking flow development.
- * DO NOT deploy to production without replacing these with real operating blocks confirmed by Kushal.
- */
-export const SLOT_TIMES = {
-  Morning: { startHour: 9, endHour: 13 },
-  Afternoon: { startHour: 14, endHour: 18 },
-  Evening: { startHour: 19, endHour: 23 },
-};
+import { SLOT_TIMES } from "@/lib/constants/slot-times";
 
 export type AdminDayAvailability = DayAvailability & {
   id?: string;

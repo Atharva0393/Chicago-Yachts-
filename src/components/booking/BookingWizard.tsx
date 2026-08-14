@@ -97,7 +97,12 @@ export function BookingWizard({ yacht }: { yacht: any }) {
 
   const handleNext = async () => {
     if (currentStep === 5) {
-      // Step 5 -> 6: Acquire Hold
+      // Step 5 -> 6: Acquire Hold (or reuse existing active hold)
+      if (holdToken && holdExpiresAt && holdExpiresAt > new Date()) {
+        setCurrentStep(6);
+        return;
+      }
+
       setIsAcquiringHold(true);
       try {
         const res = await createBookingHoldAction({
@@ -114,10 +119,13 @@ export function BookingWizard({ yacht }: { yacht: any }) {
           setHoldExpiresAt(new Date(res.expiresAt));
           setCurrentStep(6);
         } else {
-          alert("We're sorry, but this time slot is no longer available or could not be priced. Please select another time.");
+          alert(res.status === "SLOT_UNAVAILABLE" 
+            ? "We're sorry, but this time slot is no longer available. Please select another date or time slot."
+            : "We could not reserve this time slot right now. Please try again or select another time slot.");
         }
-      } catch (e) {
-        alert("An error occurred trying to reserve your time. Please try again.");
+      } catch (e: any) {
+        console.error("[WIZARD ERROR] Step 5 hold acquisition failed:", e);
+        alert(`An error occurred trying to reserve your time slot: ${e?.message || "Please try again."}`);
       } finally {
         setIsAcquiringHold(false);
       }
@@ -137,13 +145,14 @@ export function BookingWizard({ yacht }: { yacht: any }) {
         });
 
         if (res.status === "VALIDATION_ERROR") {
-          setFormErrors(res.errors);
+          setFormErrors(res.errors || {});
           return;
         } else if (res.status === "EXPIRED") {
-          alert("Your reservation hold has expired.");
+          alert("Your reservation hold has expired. Please select a time slot again.");
           return;
         } else if (res.status !== "SUCCESS") {
-          alert(res.message || "Failed to save details");
+          console.warn("[WIZARD WARN] saveCheckoutGuestAction non-success:", res);
+          alert(res.message || "Failed to save guest details");
           return;
         }
 
@@ -153,10 +162,12 @@ export function BookingWizard({ yacht }: { yacht: any }) {
           setServerHoldData(holdRes.hold);
           setCurrentStep(7);
         } else {
+          console.warn("[WIZARD WARN] getCheckoutHoldAction non-active:", holdRes);
           alert(holdRes.message || "Failed to load checkout data");
         }
-      } catch (e) {
-        alert("An error occurred.");
+      } catch (e: any) {
+        console.error("[WIZARD ERROR] Step 6 guest save failed:", e);
+        alert(`An error occurred saving your details: ${e?.message || "Please try again."}`);
       } finally {
         setIsSavingGuest(false);
       }
@@ -191,7 +202,7 @@ export function BookingWizard({ yacht }: { yacht: any }) {
     if (currentStep === 1 && !selectedDate) return true;
     if (currentStep === 2 && !timeSlot) return true;
     if (currentStep === 3 && (guests < 1 || guests > maxGuests)) return true;
-    if (currentStep === 5 && (quoteStatus !== "SUCCESS" || isAcquiringHold)) return true;
+    if (currentStep === 5 && (quoteStatus === "LOADING" || isAcquiringHold)) return true;
     if (currentStep === 6 && isSavingGuest) return true;
     return false;
   };

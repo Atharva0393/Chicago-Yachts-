@@ -37,9 +37,22 @@ export async function createBookingHoldAction(req: CreateHoldRequest): Promise<C
   }
 
   try {
-    return await bookingHoldService.createBookingHold(req);
-  } catch (error) {
-    console.error("Action error in createBookingHoldAction:", error);
+    const res = await bookingHoldService.createBookingHold(req);
+    if (res.status !== "SUCCESS") {
+      console.warn("[ACTION WARN] createBookingHoldAction status:", {
+        status: res.status,
+        req: { yachtId: req.yachtId, dateStr: req.dateStr, timeSlot: req.timeSlot, guests: req.guests }
+      });
+    }
+    return res;
+  } catch (error: any) {
+    console.error("[ACTION ERROR] createBookingHoldAction failed:", {
+      name: error?.name,
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+      req: { yachtId: req.yachtId, dateStr: req.dateStr, timeSlot: req.timeSlot }
+    });
     return { status: "ERROR" };
   }
 }
